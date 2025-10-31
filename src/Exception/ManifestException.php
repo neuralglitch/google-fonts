@@ -7,4 +7,3 @@ namespace NeuralGlitch\GoogleFonts\Exception;
 class ManifestException extends GoogleFontsException
 {
 }
-

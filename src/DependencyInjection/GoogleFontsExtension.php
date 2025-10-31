@@ -33,4 +33,3 @@ final class GoogleFontsExtension extends Extension
         return 'google_fonts';
     }
 }
-

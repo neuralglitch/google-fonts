@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NeuralGlitch\GoogleFonts\Command;
 
-use Exception;
 use NeuralGlitch\GoogleFonts\Service\FontDownloader;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -111,7 +110,7 @@ final class FontsImportCommand extends Command
             ]);
 
             return Command::SUCCESS;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $io->error([
                 sprintf('Failed to import font "%s"', $fontName),
                 $e->getMessage(),
@@ -121,4 +120,3 @@ final class FontsImportCommand extends Command
         }
     }
 }
-

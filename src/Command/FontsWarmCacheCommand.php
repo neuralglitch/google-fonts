@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace NeuralGlitch\GoogleFonts\Command;
 
-use Exception;
-use NeuralGlitch\GoogleFonts\Exception\ManifestException;
 use NeuralGlitch\GoogleFonts\Service\FontDownloader;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -64,6 +62,7 @@ final class FontsWarmCacheCommand extends Command
         if (!$this->filesystem->exists($manifestPath)) {
             $io->error(sprintf('Manifest file not found: %s', $manifestPath));
             $io->note('Run "gfonts:lock" first to create a manifest file.');
+
             return Command::FAILURE;
         }
 
@@ -72,6 +71,7 @@ final class FontsWarmCacheCommand extends Command
 
         if (!is_array($manifest) || !isset($manifest['fonts']) || !is_array($manifest['fonts'])) {
             $io->error('Invalid manifest file format.');
+
             return Command::FAILURE;
         }
 
@@ -95,9 +95,9 @@ final class FontsWarmCacheCommand extends Command
                 $display = is_string($config['display'] ?? null) ? $config['display'] : 'swap';
 
                 $this->fontDownloader->downloadFont($fontName, $weights, $styles, $display);
-                $success++;
-            } catch (Exception $e) {
-                $failed++;
+                ++$success;
+            } catch (\Exception $e) {
+                ++$failed;
                 $io->newLine(2);
                 $io->warning(sprintf('Failed to download font "%s": %s', $fontName, $e->getMessage()));
             }
@@ -108,8 +108,9 @@ final class FontsWarmCacheCommand extends Command
         $progressBar->finish();
         $io->newLine(2);
 
-        if ($failed === 0) {
+        if (0 === $failed) {
             $io->success(sprintf('Successfully warmed cache for %d font(s)', $success));
+
             return Command::SUCCESS;
         }
 
@@ -124,4 +125,3 @@ final class FontsWarmCacheCommand extends Command
         return Command::FAILURE;
     }
 }
-

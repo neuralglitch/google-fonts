@@ -5,23 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
-
-- N/A
-
-### Changed
-
-- N/A
-
-### Fixed
-
-- N/A
-
----
-
-## [1.0.0] - 2025-01-XX
+## [0.1.0] - 2025-11-01
 
 ### Added
 
@@ -32,10 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic CSS variable generation for font families
 - Intelligent CSS rules for body, headings, and bold text
 - Console commands:
-  - `gfonts:search` - Search Google Fonts catalog
-  - `gfonts:import` - Download a specific font locally
-  - `gfonts:lock` - Scan templates and lock all used fonts
-  - `gfonts:warm-cache` - Pre-download fonts from manifest for CI/CD
+    - `gfonts:search` - Search Google Fonts catalog
+    - `gfonts:import` - Download a specific font locally
+    - `gfonts:lock` - Scan templates and lock all used fonts
+    - `gfonts:warm-cache` - Pre-download fonts from manifest for CI/CD
 - Font manifest file for production font management
 - Performance optimizations with manifest caching
 - Support for multiple weights and styles

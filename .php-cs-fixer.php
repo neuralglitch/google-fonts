@@ -20,6 +20,7 @@ $config
         'phpdoc_scalar' => true,
         'unary_operator_spaces' => true,
         'binary_operator_spaces' => true,
+        'concat_space' => ['spacing' => 'one'], // Require spaces around concatenation operator
         'blank_line_before_statement' => [
             'statements' => ['break', 'continue', 'declare', 'return', 'throw', 'try'],
         ],

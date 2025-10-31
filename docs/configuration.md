@@ -23,6 +23,7 @@ when@prod:
 ```
 
 **Key points:**
+
 - Development uses Google Fonts CDN with preconnect
 - Production automatically uses locked fonts (no separate config file needed)
 - All configuration in one file using Symfony's `when@` syntax
@@ -43,6 +44,7 @@ google_fonts:
 ```
 
 **When to use:**
+
 - `false` - Development (uses CDN, fast iteration)
 - `true` - Production (uses local fonts, better performance)
 
@@ -59,6 +61,7 @@ google_fonts:
 ```
 
 **Path must:**
+
 - Be writable by PHP
 - Be accessible to the web server (for production)
 - Be inside `assets/` for AssetMapper integration
@@ -76,6 +79,7 @@ google_fonts:
 ```
 
 **Contains:**
+
 - List of locked fonts
 - Font weights and styles
 - File paths
@@ -95,6 +99,7 @@ google_fonts:
 ```
 
 **Options:**
+
 - `swap` (recommended) - Swap font when ready, use fallback initially
 - `auto` - Browser decides strategy
 - `block` - Block rendering up to 3 seconds
@@ -102,6 +107,7 @@ google_fonts:
 - `optional` - No block, no swap (best for performance)
 
 Can be overridden per font:
+
 ```twig
 {{ google_fonts('Ubuntu', '400', 'normal', 'optional') }}
 ```
@@ -120,16 +126,19 @@ google_fonts:
 ```
 
 **When enabled**, generates:
+
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ```
 
 **Benefits:**
+
 - Faster font loading (DNS prefetch + TLS handshake)
 - Recommended for production CDN use
 
 **When to disable:**
+
 - Strict CSP (Content Security Policy)
 - Offline development
 - Using locked fonts only
@@ -163,6 +172,7 @@ when@test:
 ```
 
 **Benefits:**
+
 - Single configuration file
 - Clear environment differences
 - No need for separate `dev/`, `prod/`, `test/` directories
@@ -172,6 +182,7 @@ when@test:
 If you prefer separate files per environment:
 
 **Development:**
+
 ```yaml
 # config/packages/dev/google_fonts.yaml
 google_fonts:
@@ -181,6 +192,7 @@ google_fonts:
 ```
 
 **Production:**
+
 ```yaml
 # config/packages/prod/google_fonts.yaml
 google_fonts:
@@ -190,6 +202,7 @@ google_fonts:
 ```
 
 **Test:**
+
 ```yaml
 # config/packages/test/google_fonts.yaml
 google_fonts:
@@ -241,6 +254,7 @@ framework:
 ```
 
 Fonts in `assets/fonts/` are automatically:
+
 - Versioned
 - Served with proper cache headers
 - Included in asset manifest
@@ -265,6 +279,7 @@ services:
 The bundle validates configuration on container compile:
 
 **Valid:**
+
 ```yaml
 google_fonts:
   use_locked_fonts: true
@@ -272,6 +287,7 @@ google_fonts:
 ```
 
 **Invalid:**
+
 ```yaml
 google_fonts:
   use_locked_fonts: "yes"  # Error: must be boolean
@@ -315,6 +331,7 @@ php bin/console debug:config google_fonts
 ```
 
 Output:
+
 ```yaml
 Current configuration for "google_fonts"
 =========================================

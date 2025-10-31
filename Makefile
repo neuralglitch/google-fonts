@@ -14,14 +14,14 @@ build: ## Build Docker image
 shell: ## Open shell in Docker container
 	docker compose run --rm php bash
 
-install: ## Install dependencies in Docker
+install: ## Install composer dependencies in Docker
 	docker compose run --rm php composer install
 
 test: ## Run tests in Docker
 	docker compose run --rm php composer test
 
 test-coverage: ## Run tests with code coverage in Docker
-	docker compose run --rm php composer test:coverage
+	XDEBUG_ENABLED=1 docker compose run --rm -e XDEBUG_MODE=coverage php composer test:coverage
 
 phpstan: ## Run PHPStan in Docker
 	docker compose run --rm php composer phpstan

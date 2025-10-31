@@ -131,4 +131,3 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         self::assertStringNotContainsString('/assets/fonts/', $html);
     }
 }
-

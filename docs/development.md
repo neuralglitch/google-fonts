@@ -264,30 +264,30 @@ php bin/console debug:container GoogleFonts
 ### Key Components
 
 1. **GoogleFontsExtension** (Twig)
-   - Renders `google_fonts()` function
-   - Handles dev/prod mode switching
-   - Manages manifest cache
+    - Renders `google_fonts()` function
+    - Handles dev/prod mode switching
+    - Manages manifest cache
 
 2. **GoogleFontsApi** (Service)
-   - Interacts with Google Fonts API
-   - Downloads font CSS
-   - Searches font catalog
+    - Interacts with Google Fonts API
+    - Downloads font CSS
+    - Searches font catalog
 
 3. **FontDownloader** (Service)
-   - Downloads font files
-   - Generates @font-face CSS
-   - Creates intelligent stylesheets
+    - Downloads font files
+    - Generates @font-face CSS
+    - Creates intelligent stylesheets
 
 4. **FontLockManager** (Service)
-   - Scans Twig templates
-   - Orchestrates font locking
-   - Manages manifest file
+    - Scans Twig templates
+    - Orchestrates font locking
+    - Manages manifest file
 
 5. **Commands**
-   - `FontsSearchCommand` - Search fonts
-   - `FontsImportCommand` - Import font
-   - `FontsLockCommand` - Lock fonts
-   - `FontsWarmCacheCommand` - Warm cache
+    - `FontsSearchCommand` - Search fonts
+    - `FontsImportCommand` - Import font
+    - `FontsLockCommand` - Lock fonts
+    - `FontsWarmCacheCommand` - Warm cache
 
 ### Design Patterns
 

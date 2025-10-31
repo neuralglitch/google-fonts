@@ -20,6 +20,7 @@ php bin/console gfonts:lock
 ```
 
 This creates:
+
 - `assets/fonts/` - Downloaded font files
 - `assets/fonts.json` - Font manifest
 
@@ -61,6 +62,7 @@ During development, use the CDN:
 ```
 
 Configuration (development):
+
 ```yaml
 # config/packages/google_fonts.yaml
 google_fonts:
@@ -76,6 +78,7 @@ php bin/console gfonts:lock
 ```
 
 Output:
+
 ```
 Lock Fonts
 
@@ -104,6 +107,7 @@ ls -la assets/fonts/
 ```
 
 Output:
+
 ```
 ubuntu/
   - ubuntu.css
@@ -148,6 +152,7 @@ framework:
 ```
 
 AssetMapper will:
+
 - Version font files
 - Serve with proper cache headers
 - Update manifest automatically
@@ -157,6 +162,7 @@ AssetMapper will:
 Ensure `assets/fonts/` is web-accessible.
 
 **Nginx:**
+
 ```nginx
 location /assets/fonts/ {
     expires 1y;
@@ -165,6 +171,7 @@ location /assets/fonts/ {
 ```
 
 **Apache:**
+
 ```apache
 <Directory /path/to/project/assets/fonts>
     ExpiresActive On
@@ -192,11 +199,13 @@ git push
 ### Strategy 1: Commit Font Files
 
 **Pros:**
+
 - Simple deployment
 - No build step needed
 - Works anywhere
 
 **Cons:**
+
 - Larger repository size
 - More merge conflicts
 
@@ -209,10 +218,12 @@ git commit -m "Lock fonts"
 ### Strategy 2: Download During Deployment
 
 **Pros:**
+
 - Smaller repository
 - Cleaner git history
 
 **Cons:**
+
 - Requires build step
 - Depends on external service
 
@@ -247,10 +258,12 @@ php bin/console cache:clear --env=prod
 ### Strategy 3: Build Artifact
 
 **Pros:**
+
 - Clean separation
 - Optimized for CI/CD
 
 **Cons:**
+
 - More complex setup
 
 ```yaml
@@ -339,6 +352,7 @@ In production, the function should render local files:
 ```
 
 Not CDN:
+
 ```html
 <!-- This should NOT appear in production -->
 <link href="https://fonts.googleapis.com/..." rel="stylesheet">
@@ -362,6 +376,7 @@ php bin/console debug:config google_fonts --env=prod
 ### Browser DevTools
 
 Check Network tab:
+
 - [x] No requests to `fonts.googleapis.com`
 - [x] Fonts loaded from `/assets/fonts/`
 - [x] Proper cache headers
@@ -408,12 +423,14 @@ php bin/console cache:clear --env=prod
 ### Fonts Not Loading
 
 **Check:**
+
 1. `use_locked_fonts: true` in production config
 2. `assets/fonts.json` exists
 3. Font files exist in `assets/fonts/`
 4. Directory is web-accessible
 
 **Debug:**
+
 ```bash
 # Check config
 php bin/console debug:config google_fonts
@@ -430,6 +447,7 @@ ls -la assets/fonts/ubuntu/
 **Cause**: Fonts not accessible to web server
 
 **Fix**:
+
 ```bash
 # Check permissions
 chmod -R 755 assets/fonts/
@@ -443,6 +461,7 @@ sudo -u www-data ls assets/fonts/
 **Cause**: Old locked fonts
 
 **Fix**:
+
 ```bash
 # Force re-lock
 php bin/console gfonts:lock --force

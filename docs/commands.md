@@ -227,6 +227,7 @@ The command scans for patterns like:
 ```
 
 And extracts:
+
 - Font family name
 - Weights (with defaults if omitted)
 - Styles (with defaults if omitted)
@@ -321,6 +322,7 @@ php bin/console gfonts:lock templates/
 **Error**: "Font not found"
 
 Check font name spelling:
+
 ```bash
 php bin/console gfonts:search "Font Name"
 ```
@@ -328,6 +330,7 @@ php bin/console gfonts:search "Font Name"
 **Error**: "Manifest file not found"
 
 Run lock command first:
+
 ```bash
 php bin/console gfonts:lock
 ```
@@ -335,6 +338,7 @@ php bin/console gfonts:lock
 **Error**: "Failed to download font"
 
 Check:
+
 - Internet connection
 - Google Fonts API availability
 - Font name is correct
