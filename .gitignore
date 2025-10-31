@@ -1,0 +1,33 @@
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# IDEs and Editors
+**/.idea/
+**/.vscode/
+**/.editorconfig
+**/*.swp
+**/*.swo
+**/*~
+
+# Logs
+**/*.log
+**/logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+/vendor/
+.phpunit.result.cache
+.php-cs-fixer.cache
+assets/fonts/
+composer.lock
+build/
+.gitconfig
+
+# Local configuration overrides
+/phpunit.xml
+/phpstan.neon
+
