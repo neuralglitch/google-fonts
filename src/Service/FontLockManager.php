@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace NeuralGlitch\GoogleFonts\Service;
 
-use DateTimeImmutable;
 use NeuralGlitch\GoogleFonts\Exception\FontDownloadException;
 use NeuralGlitch\GoogleFonts\Exception\ManifestException;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 final class FontLockManager
 {
@@ -22,9 +21,10 @@ final class FontLockManager
     }
 
     /**
-     * Scan Twig templates for google_fonts() function usage
+     * Scan Twig templates for google_fonts() function usage.
      *
      * @param string|array<string> $templateDirs
+     *
      * @return array<string, array{weights: array<int|string>, styles: array<string>}>
      */
     public function scanTemplates($templateDirs): array
@@ -97,9 +97,10 @@ final class FontLockManager
     }
 
     /**
-     * Lock fonts (download and generate manifest)
+     * Lock fonts (download and generate manifest).
      *
      * @param array<string, array{weights: array<int|string>, styles: array<string>}> $fonts
+     *
      * @return array<string, mixed>
      */
     public function lockFonts(array $fonts): array
@@ -108,7 +109,7 @@ final class FontLockManager
 
         $manifest = [
             'locked' => true,
-            'generated_at' => (new DateTimeImmutable())->format('c'),
+            'generated_at' => (new \DateTimeImmutable())->format('c'),
             'fonts' => [],
         ];
 
@@ -140,17 +141,13 @@ final class FontLockManager
                 ];
             } catch (FontDownloadException $e) {
                 // Re-throw to let caller handle it
-                throw new FontDownloadException(
-                    sprintf('Failed to download font "%s": %s', $fontName, $e->getMessage()),
-                    0,
-                    $e
-                );
+                throw new FontDownloadException(sprintf('Failed to download font "%s": %s', $fontName, $e->getMessage()), 0, $e);
             }
         }
 
         // Save manifest
         $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        if ($json === false) {
+        if (false === $json) {
             throw new ManifestException('Failed to encode manifest JSON');
         }
 
@@ -160,7 +157,7 @@ final class FontLockManager
     }
 
     /**
-     * Parse function arguments
+     * Parse function arguments.
      *
      * @return array<string, mixed>
      */
@@ -191,7 +188,7 @@ final class FontLockManager
     }
 
     /**
-     * Split function arguments respecting quotes and arrays
+     * Split function arguments respecting quotes and arrays.
      *
      * @return array<string>
      */
@@ -203,10 +200,10 @@ final class FontLockManager
         $inQuotes = false;
         $quoteChar = null;
 
-        for ($i = 0; $i < strlen($args); $i++) {
+        for ($i = 0; $i < strlen($args); ++$i) {
             $char = $args[$i];
 
-            if (!$inQuotes && ($char === '\'' || $char === '"')) {
+            if (!$inQuotes && ('\'' === $char || '"' === $char)) {
                 $inQuotes = true;
                 $quoteChar = $char;
                 $current .= $char;
@@ -214,13 +211,13 @@ final class FontLockManager
                 $inQuotes = false;
                 $quoteChar = null;
                 $current .= $char;
-            } elseif (!$inQuotes && $char === '[') {
-                $depth++;
+            } elseif (!$inQuotes && '[' === $char) {
+                ++$depth;
                 $current .= $char;
-            } elseif (!$inQuotes && $char === ']') {
-                $depth--;
+            } elseif (!$inQuotes && ']' === $char) {
+                --$depth;
                 $current .= $char;
-            } elseif (!$inQuotes && $depth === 0 && $char === ',') {
+            } elseif (!$inQuotes && 0 === $depth && ',' === $char) {
                 $parts[] = trim($current);
                 $current = '';
             } else {
@@ -228,7 +225,7 @@ final class FontLockManager
             }
         }
 
-        if ($current !== '') {
+        if ('' !== $current) {
             $parts[] = trim($current);
         }
 
@@ -236,7 +233,7 @@ final class FontLockManager
     }
 
     /**
-     * Parse array or string value
+     * Parse array or string value.
      *
      * @return array<string>
      */
@@ -267,4 +264,3 @@ final class FontLockManager
         return $this->manifestFile;
     }
 }
-

@@ -30,12 +30,12 @@ Add the `google_fonts()` function to your base template:
 
 ### Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `name` | string | Yes | - | Font family name (e.g., "Ubuntu", "Roboto", "Open Sans") |
-| `weights` | string\|array | No | `['400']` | Font weights as space-separated string or array |
-| `styles` | string\|array | No | `['normal']` | Font styles as space-separated string or array |
-| `display` | string | No | `'swap'` | Font display strategy |
+| Parameter | Type          | Required | Default      | Description                                              |
+|-----------|---------------|----------|--------------|----------------------------------------------------------|
+| `name`    | string        | Yes      | -            | Font family name (e.g., "Ubuntu", "Roboto", "Open Sans") |
+| `weights` | string\|array | No       | `['400']`    | Font weights as space-separated string or array          |
+| `styles`  | string\|array | No       | `['normal']` | Font styles as space-separated string or array           |
+| `display` | string        | No       | `'swap'`     | Font display strategy                                    |
 
 ### Font Display Options
 
@@ -54,6 +54,7 @@ Add the `google_fonts()` function to your base template:
 ```
 
 Renders:
+
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -127,6 +128,7 @@ The function automatically creates CSS variables for each font:
 ```
 
 Creates:
+
 ```css
 :root {
   --font-family-ubuntu: 'Ubuntu', sans-serif;
@@ -157,6 +159,7 @@ In development, fonts are loaded from Google Fonts CDN:
 ```
 
 **Benefits:**
+
 - Fast iteration
 - No build step required
 - Always up-to-date fonts
@@ -171,6 +174,7 @@ In production with `use_locked_fonts: true`:
 ```
 
 **Benefits:**
+
 - Better performance (no external requests)
 - Improved privacy (no Google tracking)
 - Offline support
@@ -225,6 +229,7 @@ Fonts in `assets/fonts/` are automatically versioned and served by AssetMapper.
 ### Fonts Not Loading in Development
 
 Check that:
+
 1. Function is called in `<head>` section
 2. No CSP (Content Security Policy) blocking Google Fonts
 3. Network connection available
@@ -232,6 +237,7 @@ Check that:
 ### Fonts Not Loading in Production
 
 Check that:
+
 1. `use_locked_fonts: true` is set in production config
 2. Fonts were locked with `php bin/console gfonts:lock`
 3. `assets/fonts/` directory is accessible to web server
@@ -240,6 +246,7 @@ Check that:
 ### Wrong Font Displayed
 
 Check that:
+
 1. Font name matches exactly (case-sensitive)
 2. Weights are available for that font family
 3. CSS specificity isn't overriding font styles

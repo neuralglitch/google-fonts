@@ -35,12 +35,13 @@ final class GoogleFontsExtension extends AbstractExtension
     }
 
     /**
-     * Render Google Fonts or locked fonts
+     * Render Google Fonts or locked fonts.
      *
-     * @param string $name Font family name (e.g., "Ubuntu", "Roboto")
+     * @param string                   $name    Font family name (e.g., "Ubuntu", "Roboto")
      * @param array<int|string>|string $weights Font weights (e.g., "300 400 500 700" or [300, 400, 500, 700])
-     * @param array<string>|string $styles Font styles (e.g., "normal italic" or ["normal", "italic"])
-     * @param string|null $display Font display value (default: "swap")
+     * @param array<string>|string     $styles  Font styles (e.g., "normal italic" or ["normal", "italic"])
+     * @param string|null              $display Font display value (default: "swap")
+     *
      * @return string HTML string with font links and styles
      */
     public function renderFonts(
@@ -54,15 +55,15 @@ final class GoogleFontsExtension extends AbstractExtension
         $normalizedStylesRaw = $this->normalizeArray($styles);
         // Cast styles to string array
         $normalizedStyles = array_map('strval', $normalizedStylesRaw);
-        
+
         $displayValue = $this->defaults['display'] ?? 'swap';
         $display = is_string($display) ? $display : (is_string($displayValue) ? $displayValue : 'swap');
-        
+
         $preconnectValue = $this->defaults['preconnect'] ?? true;
         $preconnect = is_bool($preconnectValue) ? $preconnectValue : true;
 
         // Check if we should use locked fonts
-        if ($this->useLockedFonts && $this->environment === 'prod' && $this->hasLockedFonts($name)) {
+        if ($this->useLockedFonts && 'prod' === $this->environment && $this->hasLockedFonts($name)) {
             return $this->renderLockedFonts($name);
         }
 
@@ -70,10 +71,10 @@ final class GoogleFontsExtension extends AbstractExtension
     }
 
     /**
-     * Render Google Fonts CDN links with inline styles (development)
+     * Render Google Fonts CDN links with inline styles (development).
      *
      * @param array<int|string> $weights
-     * @param array<string> $styles
+     * @param array<string>     $styles
      */
     private function renderGoogleFonts(
         string $name,
@@ -93,7 +94,7 @@ final class GoogleFontsExtension extends AbstractExtension
         );
 
         $fontVar = '--font-family-' . FontVariantHelper::sanitizeFontName($name);
-        $defaultWeight = !empty($weights) ? (int)reset($weights) : 400;
+        $defaultWeight = !empty($weights) ? (int) reset($weights) : 400;
         $headingWeight = $this->findWeight($weights, 500, 700);
         $boldWeight = $this->findWeight($weights, 700, 700);
 
@@ -130,7 +131,7 @@ final class GoogleFontsExtension extends AbstractExtension
     }
 
     /**
-     * Render locked/local fonts (production)
+     * Render locked/local fonts (production).
      */
     private function renderLockedFonts(string $name): string
     {
@@ -147,9 +148,10 @@ final class GoogleFontsExtension extends AbstractExtension
     }
 
     /**
-     * Normalize input to array
+     * Normalize input to array.
      *
      * @param array<int|string>|string $input
+     *
      * @return array<int|string>
      */
     private function normalizeArray(array|string $input): array
@@ -158,23 +160,24 @@ final class GoogleFontsExtension extends AbstractExtension
     }
 
     /**
-     * Find weight that meets criteria
+     * Find weight that meets criteria.
      *
      * @param array<int|string> $weights
      */
     private function findWeight(array $weights, int $min, int $default): int
     {
         foreach ($weights as $weight) {
-            $w = (int)$weight;
+            $w = (int) $weight;
             if ($w > $min) {
                 return $w;
             }
         }
+
         return $default;
     }
 
     /**
-     * Check if font is locked (with caching for performance)
+     * Check if font is locked (with caching for performance).
      */
     private function hasLockedFonts(string $fontName): bool
     {
@@ -184,13 +187,13 @@ final class GoogleFontsExtension extends AbstractExtension
 
         // Check if manifest file has been modified
         $mtime = filemtime($this->manifestFile);
-        if ($mtime === false) {
+        if (false === $mtime) {
             return false;
         }
 
-        if (self::$manifestCache === null || self::$manifestMtime !== $mtime) {
+        if (null === self::$manifestCache || self::$manifestMtime !== $mtime) {
             $content = file_get_contents($this->manifestFile);
-            if ($content === false) {
+            if (false === $content) {
                 return false;
             }
 
@@ -213,4 +216,3 @@ final class GoogleFontsExtension extends AbstractExtension
         return isset(self::$manifestCache[$fontName]);
     }
 }
-

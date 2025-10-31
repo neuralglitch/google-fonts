@@ -17,7 +17,7 @@ final class GoogleFontsApi
     }
 
     /**
-     * Search fonts by name
+     * Search fonts by name.
      *
      * @return array<string, mixed>
      */
@@ -33,10 +33,10 @@ final class GoogleFontsApi
         $data = $response->toArray();
         $fonts = $data['items'] ?? [];
 
-        if ($query !== '') {
+        if ('' !== $query) {
             $queryLower = strtolower($query);
             $fonts = array_filter($fonts, function (array $font) use ($queryLower): bool {
-                return stripos($font['family'], $queryLower) !== false;
+                return false !== stripos($font['family'], $queryLower);
             });
         }
 
@@ -44,7 +44,7 @@ final class GoogleFontsApi
     }
 
     /**
-     * Get font metadata
+     * Get font metadata.
      *
      * @return array<string, mixed>|null
      */
@@ -65,7 +65,7 @@ final class GoogleFontsApi
     }
 
     /**
-     * Get available weights and styles for a font
+     * Get available weights and styles for a font.
      *
      * @return array{weights: array<int>, styles: array<string>}
      */
@@ -89,8 +89,8 @@ final class GoogleFontsApi
             // Parse variant like "300", "300italic", "regular", "italic", "700", "700italic"
             if (str_ends_with($variant, 'italic')) {
                 $weightStr = substr($variant, 0, -6);
-                $weight = $weightStr !== '' ? (int) $weightStr : 0;
-                if ($weight === 0) {
+                $weight = '' !== $weightStr ? (int) $weightStr : 0;
+                if (0 === $weight) {
                     $weight = 400;
                 }
                 $weights[] = $weight;
@@ -98,8 +98,8 @@ final class GoogleFontsApi
                     $styles[] = 'italic';
                 }
             } else {
-                $weight = $variant !== '' ? (int) $variant : 0;
-                if ($weight === 0) {
+                $weight = '' !== $variant ? (int) $variant : 0;
+                if (0 === $weight) {
                     $weight = 400; // "regular" variant
                 }
                 $weights[] = $weight;
@@ -113,10 +113,10 @@ final class GoogleFontsApi
     }
 
     /**
-     * Download font CSS from Google Fonts
+     * Download font CSS from Google Fonts.
      *
      * @param array<int|string> $weights
-     * @param array<string> $styles
+     * @param array<string>     $styles
      */
     public function downloadFontCss(string $fontName, array $weights, array $styles, string $display = 'swap'): string
     {
@@ -140,4 +140,3 @@ final class GoogleFontsApi
         return $response->getContent();
     }
 }
-

@@ -6,9 +6,20 @@ namespace NeuralGlitch\GoogleFonts\Tests;
 
 use NeuralGlitch\GoogleFonts\Twig\GoogleFontsExtension;
 use PHPUnit\Framework\TestCase;
+use Twig\TwigFunction;
 
 final class GoogleFontsExtensionTest extends TestCase
 {
+    public function testGetFunctionsReturnsTwigFunctions(): void
+    {
+        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $functions = $extension->getFunctions();
+
+        self::assertIsArray($functions);
+        self::assertCount(1, $functions);
+        self::assertInstanceOf(TwigFunction::class, $functions[0]);
+    }
+
     public function testRenderFontsWithStringWeights(): void
     {
         $extension = new GoogleFontsExtension('dev', false, null, []);
@@ -103,5 +114,24 @@ final class GoogleFontsExtensionTest extends TestCase
         self::assertStringContainsString('Open+Sans', $html);
         self::assertStringContainsString('Open Sans', $html);
     }
-}
 
+    public function testRenderFontsSelectsBoldWeight(): void
+    {
+        $extension = new GoogleFontsExtension('dev', false, null, []);
+
+        // With weight >= 700, should use it for bold
+        $html = $extension->renderFonts('Ubuntu', '300 400 800');
+
+        self::assertStringContainsString('font-weight: 800', $html);
+    }
+
+    public function testRenderFontsSelectsHeadingWeight(): void
+    {
+        $extension = new GoogleFontsExtension('dev', false, null, []);
+
+        // With weight > 500, should use it for headings
+        $html = $extension->renderFonts('Ubuntu', '300 400 600');
+
+        self::assertStringContainsString('font-weight: 600', $html);
+    }
+}

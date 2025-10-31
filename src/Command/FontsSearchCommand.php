@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NeuralGlitch\GoogleFonts\Command;
 
-use Exception;
 use NeuralGlitch\GoogleFonts\Service\GoogleFontsApi;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -58,7 +57,7 @@ final class FontsSearchCommand extends Command
 
         $io->title('Search Google Fonts');
 
-        if ($query === '') {
+        if ('' === $query) {
             $io->section('Popular Fonts');
         } else {
             $io->section(sprintf('Search Results for: "%s"', $query));
@@ -69,6 +68,7 @@ final class FontsSearchCommand extends Command
 
             if (!is_array($fonts) || empty($fonts)) {
                 $io->warning('No fonts found.');
+
                 return Command::SUCCESS;
             }
 
@@ -92,7 +92,7 @@ final class FontsSearchCommand extends Command
             );
 
             return Command::SUCCESS;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $io->error([
                 'Failed to search fonts',
                 $e->getMessage(),
@@ -102,4 +102,3 @@ final class FontsSearchCommand extends Command
         }
     }
 }
-

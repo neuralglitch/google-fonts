@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NeuralGlitch\GoogleFonts\Command;
 
-use Exception;
 use NeuralGlitch\GoogleFonts\Service\FontLockManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -72,6 +71,7 @@ final class FontsLockCommand extends Command
 
             if (empty($templateDirs)) {
                 $io->error('No template directories found. Please specify template directories as arguments.');
+
                 return Command::FAILURE;
             }
         }
@@ -80,12 +80,13 @@ final class FontsLockCommand extends Command
         $templateDirs = array_filter($templateDirs, 'is_string');
 
         $io->section('Scanning templates');
-        $io->listing(array_map(fn(string $dir): string => "<info>{$dir}</info>", $templateDirs));
+        $io->listing(array_map(fn (string $dir): string => "<info>{$dir}</info>", $templateDirs));
 
         $fonts = $this->lockManager->scanTemplates($templateDirs);
 
         if (!is_array($fonts) || empty($fonts)) {
             $io->warning('No google_fonts() function calls found in templates.');
+
             return Command::SUCCESS;
         }
 
@@ -125,7 +126,7 @@ final class FontsLockCommand extends Command
             $io->note('Enable locked fonts in production by setting: google_fonts.use_locked_fonts: true');
 
             return Command::SUCCESS;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $io->error([
                 'Failed to lock fonts',
                 $e->getMessage(),
@@ -135,4 +136,3 @@ final class FontsLockCommand extends Command
         }
     }
 }
-

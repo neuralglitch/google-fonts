@@ -35,7 +35,8 @@
   "require-dev": {
     "phpstan/phpstan": "^1.11",
     "phpunit/phpunit": "^10.5 || ^11.0",
-    "friendsofphp/php-cs-fixer": "^3.64"
+    "friendsofphp/php-cs-fixer": "^3.64",
+    "symfony/yaml": "^6.4 || ^7.0 || ^8.0"
   },
   "autoload": {
     "psr-4": {
@@ -55,10 +56,10 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
-    "test:coverage": "vendor/bin/phpunit --coverage-html build/coverage --coverage-clover build/coverage.xml --coverage-text build/coverage.txt",
+    "test:coverage": "vendor/bin/phpunit --coverage-html build/coverage --coverage-clover build/coverage.xml --coverage-text",
     "phpstan": "vendor/bin/phpstan analyse --memory-limit=512M",
-    "cs-fix": "vendor/bin/php-cs-fixer fix",
-    "cs-check": "vendor/bin/php-cs-fixer fix --dry-run --diff"
+    "cs-fix": "vendor/bin/php-cs-fixer fix --allow-risky=yes",
+    "cs-check": "vendor/bin/php-cs-fixer fix --dry-run --diff --allow-risky=yes"
   },
   "scripts-descriptions": {
     "test": "Run PHPUnit tests",

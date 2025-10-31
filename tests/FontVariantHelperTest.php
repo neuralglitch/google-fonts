@@ -68,4 +68,3 @@ final class FontVariantHelperTest extends TestCase
         self::assertContains('wght@400', $variants);
     }
 }
-

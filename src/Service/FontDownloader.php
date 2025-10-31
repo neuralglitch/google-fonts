@@ -21,10 +21,11 @@ final class FontDownloader
     }
 
     /**
-     * Download and save a font
+     * Download and save a font.
      *
      * @param array<int|string> $weights
-     * @param array<string> $styles
+     * @param array<string>     $styles
+     *
      * @return array{files: array<string, string>, css: string, cssPath: string, stylesheetPath: string, stylesheetCss: string} Font files and CSS content
      */
     public function downloadFont(string $fontName, array $weights, array $styles, string $display = 'swap'): array
@@ -39,11 +40,7 @@ final class FontDownloader
             // Download CSS
             $css = $this->api->downloadFontCss($fontName, $weights, $styles, $display);
         } catch (HttpExceptionInterface|TransportExceptionInterface $e) {
-            throw new FontDownloadException(
-                sprintf('Failed to download CSS for font "%s": %s', $fontName, $e->getMessage()),
-                0,
-                $e
-            );
+            throw new FontDownloadException(sprintf('Failed to download CSS for font "%s": %s', $fontName, $e->getMessage()), 0, $e);
         }
 
         // Extract font URLs from CSS and download files
@@ -58,11 +55,7 @@ final class FontDownloader
                     $response = $this->httpClient->request('GET', $url);
                     $content = $response->getContent();
                 } catch (HttpExceptionInterface|TransportExceptionInterface $e) {
-                    throw new FontDownloadException(
-                        sprintf('Failed to download font file "%s": %s', $url, $e->getMessage()),
-                        0,
-                        $e
-                    );
+                    throw new FontDownloadException(sprintf('Failed to download font file "%s": %s', $url, $e->getMessage()), 0, $e);
                 }
 
                 // Determine file extension and name
@@ -109,10 +102,10 @@ final class FontDownloader
     }
 
     /**
-     * Generate intelligent CSS rules for the font
+     * Generate intelligent CSS rules for the font.
      *
      * @param array<int|string> $weights
-     * @param array<string> $styles
+     * @param array<string>     $styles
      */
     private function generateStylesheetCss(string $fontName, array $weights, array $styles): string
     {
@@ -120,14 +113,15 @@ final class FontDownloader
         $fontFamily = sprintf("'%s', sans-serif", $fontName);
 
         // Determine weights
-        $defaultWeight = !empty($weights) ? (int)reset($weights) : 400;
+        $defaultWeight = !empty($weights) ? (int) reset($weights) : 400;
 
         // Find heading weight (first weight > 500, or 700)
         $headingWeight = 700;
         foreach ($weights as $weight) {
-            $w = (int)$weight;
+            $w = (int) $weight;
             if ($w > 500) {
                 $headingWeight = $w;
+
                 break;
             }
         }
@@ -135,34 +129,34 @@ final class FontDownloader
         // Find bold weight (first weight >= 700, or 700)
         $boldWeight = 700;
         foreach ($weights as $weight) {
-            $w = (int)$weight;
+            $w = (int) $weight;
             if ($w >= 700) {
                 $boldWeight = $w;
+
                 break;
             }
         }
 
         $lines = [
-            ":root {",
+            ':root {',
             "  {$fontVar}: {$fontFamily};",
-            "}",
-            "",
-            "body {",
+            '}',
+            '',
+            'body {',
             "  font-family: var({$fontVar});",
             "  font-weight: {$defaultWeight};",
-            "}",
-            "",
-            "h1, h2, h3, h4, h5, h6 {",
+            '}',
+            '',
+            'h1, h2, h3, h4, h5, h6 {',
             "  font-family: var({$fontVar});",
             "  font-weight: {$headingWeight};",
-            "}",
-            "",
-            "strong, b {",
+            '}',
+            '',
+            'strong, b {',
             "  font-weight: {$boldWeight};",
-            "}",
+            '}',
         ];
 
         return implode("\n", $lines);
     }
 }
-
