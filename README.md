@@ -1,6 +1,6 @@
 <div align="center">
 
-# Google Fonts Bundle
+# Google Fonts
 
 ### Google Fonts integration for Symfony
 
