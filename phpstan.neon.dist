@@ -1,0 +1,11 @@
+parameters:
+  level: max
+  paths:
+    - src
+    - tests
+  checkMissingIterableValueType: true
+  checkGenericClassInNonGenericObjectType: true
+  reportUnmatchedIgnoredErrors: true
+  excludePaths:
+    - tests/*/Fixtures/*
+

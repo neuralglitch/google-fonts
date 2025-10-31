@@ -1,0 +1,46 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  NeuralGlitch\GoogleFonts\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/Entity/'
+      - '../src/Tests/'
+
+  NeuralGlitch\GoogleFonts\Service\GoogleFontsApi:
+    arguments:
+      $httpClient: '@http_client'
+
+  NeuralGlitch\GoogleFonts\Service\FontDownloader:
+    arguments:
+      $fontsDir: '%google_fonts.fonts_dir%'
+      $httpClient: '@http_client'
+      $api: '@NeuralGlitch\GoogleFonts\Service\GoogleFontsApi'
+
+  NeuralGlitch\GoogleFonts\Service\FontLockManager:
+    arguments:
+      $fontsDir: '%google_fonts.fonts_dir%'
+      $manifestFile: '%google_fonts.manifest_file%'
+      $fontDownloader: '@NeuralGlitch\GoogleFonts\Service\FontDownloader'
+
+  NeuralGlitch\GoogleFonts\Twig\GoogleFontsExtension:
+    arguments:
+      $environment: '%kernel.environment%'
+      $useLockedFonts: '%google_fonts.use_locked_fonts%'
+      $manifestFile: '%google_fonts.manifest_file%'
+      $defaults: '%google_fonts.defaults%'
+    tags:
+      - { name: 'twig.extension' }
+
+  NeuralGlitch\GoogleFonts\Command\FontsLockCommand:
+    arguments:
+      $projectDir: '%kernel.project_dir%'
+
+  NeuralGlitch\GoogleFonts\Command\FontsWarmCacheCommand:
+    arguments:
+      $manifestFile: '%google_fonts.manifest_file%'
+      $filesystem: '@Symfony\Component\Filesystem\Filesystem'
+

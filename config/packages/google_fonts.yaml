@@ -1,0 +1,15 @@
+google_fonts:
+  use_locked_fonts: false
+  fonts_dir: '%kernel.project_dir%/assets/fonts'
+  manifest_file: '%kernel.project_dir%/assets/fonts.json'
+  defaults:
+    display: 'swap'
+    preconnect: true
+
+# Production configuration
+when@prod:
+  google_fonts:
+    use_locked_fonts: true
+    defaults:
+      preconnect: false  # Not needed for local fonts
+
