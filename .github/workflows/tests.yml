@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
 
 jobs:
   tests:
@@ -54,5 +54,5 @@ jobs:
 
       - name: Report success
         if: success()
-        run: echo "✅ All tests passed for PHP ${{ matrix.php }} with Symfony ${{ matrix.symfony }}"
+        run: echo "All tests passed for PHP ${{ matrix.php }} with Symfony ${{ matrix.symfony }}"
 

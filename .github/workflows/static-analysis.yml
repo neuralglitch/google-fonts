@@ -2,9 +2,9 @@ name: Static Analysis
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
 
 jobs:
   phpstan:
@@ -42,7 +42,7 @@ jobs:
 
       - name: Report success
         if: success()
-        run: echo "✅ PHPStan analysis passed (Level Max)"
+        run: echo "PHPStan analysis passed (Level Max)"
   
   composer-validate:
     name: Validate composer.json
@@ -64,5 +64,5 @@ jobs:
 
       - name: Report success
         if: success()
-        run: echo "✅ composer.json is valid"
+        run: echo "composer.json is valid"
 
