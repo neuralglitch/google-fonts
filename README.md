@@ -8,12 +8,12 @@
 [![Symfony](https://img.shields.io/badge/Symfony-6.4+-343434?style=flat&logo=symfony&logoColor=white)](composer.json)
 <br/>
 [![Tests](https://github.com/neuralglitch/google-fonts/actions/workflows/tests.yml/badge.svg?style=flat&logo=github)](https://github.com/neuralglitch/google-fonts/actions/workflows/tests.yml)
-[![Code Coverage](https://img.shields.io/badge/PHPUnit-93.75%25-brightgreen?style=flat&logo=codecov&logoColor=white)](build/coverage/index.html)
+[![Code Coverage](https://img.shields.io/badge/PHPUnit-93.75%25-32c252?style=flat&logo=codecov&logoColor=white)](build/coverage/index.html)
 [![Static Analysis](https://github.com/neuralglitch/google-fonts/actions/workflows/static-analysis.yml/badge.svg?style=flat&logo=github)](https://github.com/neuralglitch/google-fonts/actions/workflows/static-analysis.yml)
-[![PHPStan Level](https://img.shields.io/badge/PHPStan-level%20max-brightgreen?style=flat&logo=php&logoColor=white)](phpstan.neon.dist)
+[![PHPStan Level](https://img.shields.io/badge/PHPStan-level%20max-32c252?style=flat&logo=php&logoColor=white)](phpstan.neon.dist)
 <br/>
-[![Latest Version](https://img.shields.io/packagist/v/neuralglitch/google-fonts.svg?style=flat&logo=packagist&logoColor=white)](https://packagist.org/packages/neuralglitch/google-fonts)
-[![Total Downloads](https://img.shields.io/packagist/dt/neuralglitch/google-fonts.svg?style=flat&logo=packagist&logoColor=white)](https://packagist.org/packages/neuralglitch/google-fonts)
+[![Release](https://img.shields.io/packagist/v/neuralglitch/google-fonts.svg?style=flat&logo=packagist&logoColor=white)](https://packagist.org/packages/neuralglitch/google-fonts)
+[![Downloads](https://img.shields.io/packagist/dt/neuralglitch/google-fonts.svg?style=flat&logo=packagist&logoColor=white)](https://packagist.org/packages/neuralglitch/google-fonts)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 </div>
