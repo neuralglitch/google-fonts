@@ -66,7 +66,18 @@ final class FontsWarmCacheCommand extends Command
             return Command::FAILURE;
         }
 
-        $content = $this->filesystem->readFile($manifestPath);
+        // Use Filesystem::readFile() if available (Symfony 7.1+), otherwise file_get_contents()
+        if (method_exists($this->filesystem, 'readFile')) {
+            $content = $this->filesystem->readFile($manifestPath);
+        } else {
+            $content = file_get_contents($manifestPath);
+            if (false === $content) {
+                $io->error('Failed to read manifest file.');
+
+                return Command::FAILURE;
+            }
+        }
+
         $manifest = json_decode($content, true);
 
         if (!is_array($manifest) || !isset($manifest['fonts']) || !is_array($manifest['fonts'])) {

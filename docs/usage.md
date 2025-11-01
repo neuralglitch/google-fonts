@@ -12,7 +12,11 @@ Add the `google_fonts()` function to your base template:
   <meta charset="UTF-8">
   <title>{% block title %}Welcome{% endblock %}</title>
   
+  {# Normal font for body and headings #}
   {{ google_fonts('Ubuntu', '300 400 500 700', 'normal italic') }}
+  
+  {# Monospace font for code elements #}
+  {{ google_fonts('JetBrains Mono', '400 500', 'normal', null, true) }}
   
   {% block stylesheets %}{% endblock %}
 </head>
@@ -25,17 +29,18 @@ Add the `google_fonts()` function to your base template:
 ## Function Signature
 
 ```twig
-{{ google_fonts(name, weights, styles, display) }}
+{{ google_fonts(name, weights, styles, display, monospace) }}
 ```
 
 ### Parameters
 
-| Parameter | Type          | Required | Default      | Description                                              |
-|-----------|---------------|----------|--------------|----------------------------------------------------------|
-| `name`    | string        | Yes      | -            | Font family name (e.g., "Ubuntu", "Roboto", "Open Sans") |
-| `weights` | string\|array | No       | `['400']`    | Font weights as space-separated string or array          |
-| `styles`  | string\|array | No       | `['normal']` | Font styles as space-separated string or array           |
-| `display` | string        | No       | `'swap'`     | Font display strategy                                    |
+| Parameter   | Type          | Required | Default      | Description                                              |
+|-------------|---------------|----------|--------------|----------------------------------------------------------|
+| `name`      | string        | Yes      | -            | Font family name (e.g., "Ubuntu", "Roboto", "Open Sans") |
+| `weights`   | string\|array | No       | `['400']`    | Font weights as space-separated string or array          |
+| `styles`    | string\|array | No       | `['normal']` | Font styles as space-separated string or array           |
+| `display`   | string        | No       | `'swap'`     | Font display strategy                                    |
+| `monospace` | bool          | No       | `false`      | Whether this is a monospace font for code elements       |
 
 ### Font Display Options
 
@@ -45,39 +50,152 @@ Add the `google_fonts()` function to your base template:
 - `fallback` - Very short block period, short swap period
 - `optional` - No block period, no swap period
 
-## Examples
+### Monospace Font Usage
+
+When you set the `monospace` parameter to `true`, the font will be applied to code-related elements instead of
+body/headings:
+
+```twig
+{# Apply to code elements: code, pre, kbd, samp, var, tt #}
+{{ google_fonts('Fira Code', '400 500', 'normal', null, true) }}
+```
+
+**Generated CSS (development):**
+
+```css
+:root {
+  --font-family-fira-code: 'Fira Code', monospace;
+}
+
+code, pre, kbd, samp, var, tt {
+  font-family: var(--font-family-fira-code);
+  font-weight: 400;
+}
+```
+
+**Common Monospace Fonts:**
+
+- JetBrains Mono
+- Fira Code
+- Source Code Pro
+- Roboto Mono
+- IBM Plex Mono
+- Inconsolata
+
+## Complete Examples
+
+### Basic Website with Normal + Monospace Fonts
+
+```twig
+{# templates/base.html.twig #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Website{% endblock %}</title>
+    
+    {# Normal font for body and headings #}
+    {{ google_fonts('Inter', '300 400 500 600 700', 'normal') }}
+    
+    {# Monospace font for code elements #}
+    {{ google_fonts('JetBrains Mono', '400 500', 'normal', null, true) }}
+    
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <header>
+        <h1>Welcome to My Website</h1>
+    </header>
+    
+    <main>
+        {% block content %}
+            <p>This text uses Inter font.</p>
+            <pre><code>This code uses JetBrains Mono font.</code></pre>
+        {% endblock %}
+    </main>
+</body>
+</html>
+```
+
+### Blog with Serif + Monospace Fonts
+
+```twig
+{# templates/blog/base.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    {# Serif font for elegant reading #}
+    {{ google_fonts('Crimson Pro', '300 400 600 700', 'normal italic') }}
+    
+    {# Monospace for code snippets #}
+    {{ google_fonts('Fira Code', '400 500 600', 'normal', null, true) }}
+</head>
+<body>
+    <article>
+        <h1>{{ post.title }}</h1>
+        <p>{{ post.content }}</p>
+        <pre><code>{{ post.codeSnippet }}</code></pre>
+    </article>
+</body>
+</html>
+```
+
+### Technical Documentation
+
+```twig
+{# templates/docs/base.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    {# Clean sans-serif for documentation #}
+    {{ google_fonts('IBM Plex Sans', '300 400 500 600 700', 'normal') }}
+    
+    {# Matching monospace from same family #}
+    {{ google_fonts('IBM Plex Mono', '400 500 600', 'normal', null, true) }}
+</head>
+<body>
+    <nav>
+        <h2>Documentation</h2>
+    </nav>
+    <main>
+        {% block docs %}{% endblock %}
+    </main>
+</body>
+</html>
+```
+
+### Portfolio with Modern Fonts
+
+```twig
+{# templates/portfolio/base.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    {# Modern geometric sans-serif #}
+    {{ google_fonts('Outfit', '300 400 500 600 700 800', 'normal') }}
+    
+    {# Modern monospace #}
+    {{ google_fonts('Source Code Pro', '400 500 600', 'normal', null, true) }}
+</head>
+<body>
+    <h1>John Doe - Developer</h1>
+    <section>
+        <h2>Projects</h2>
+        <pre><code class="language-php">
+echo "Hello World";
+        </code></pre>
+    </section>
+</body>
+</html>
+```
+
+## Quick Examples
 
 ### Single Weight
 
 ```twig
 {{ google_fonts('Roboto', '400') }}
-```
-
-Renders:
-
-```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
-<style>
-:root {
-  --font-family-roboto: 'Roboto', sans-serif;
-}
-
-body {
-  font-family: var(--font-family-roboto);
-  font-weight: 400;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-roboto);
-  font-weight: 700;
-}
-
-strong, b {
-  font-weight: 700;
-}
-</style>
 ```
 
 ### Multiple Weights
@@ -116,8 +234,43 @@ Load multiple fonts by calling the function multiple times:
 {{ google_fonts('Open Sans', '400 600', 'normal italic') }}
 
 {# Code font #}
-{{ google_fonts('JetBrains Mono', '400 500') }}
+{{ google_fonts('JetBrains Mono', '400 500', 'normal', null, true) }}
 ```
+
+## Font Pairing Recommendations
+
+### Modern & Clean
+- **Normal**: Inter, Roboto, Open Sans
+- **Mono**: JetBrains Mono, Fira Code, Source Code Pro
+
+### Elegant & Professional
+- **Normal**: Crimson Pro, Lora, Playfair Display
+- **Mono**: IBM Plex Mono, Roboto Mono
+
+### Technical & Sharp
+- **Normal**: IBM Plex Sans, Noto Sans, Work Sans
+- **Mono**: IBM Plex Mono, Inconsolata, Space Mono
+
+### Friendly & Approachable
+- **Normal**: Nunito, Quicksand, Poppins
+- **Mono**: Overpass Mono, Ubuntu Mono
+
+## CSS Selectors Reference
+
+### Normal Font (monospace: false)
+Applied to:
+- `body`
+- `h1, h2, h3, h4, h5, h6`
+- `strong, b` (weight only)
+
+### Monospace Font (monospace: true)
+Applied to:
+- `code`
+- `pre`
+- `kbd`
+- `samp`
+- `var`
+- `tt`
 
 ## CSS Variables
 
@@ -183,6 +336,29 @@ In production with `use_locked_fonts: true`:
 See [Production Setup](production.md) for configuration details.
 
 ## Advanced Usage
+
+### Custom Display Strategy
+
+```twig
+{# Use 'optional' for non-critical fonts #}
+{{ google_fonts('Roboto', '400', 'normal', 'optional') }}
+```
+
+### Multiple Styles
+
+```twig
+{# Include italic variants #}
+{{ google_fonts('Merriweather', '300 400 700', 'normal italic') }}
+{{ google_fonts('Fira Code', '400 500', 'normal', null, true) }}
+```
+
+### Minimal Weights for Performance
+
+```twig
+{# Only load exactly what you need #}
+{{ google_fonts('Inter', '400 600', 'normal') }}
+{{ google_fonts('JetBrains Mono', '400', 'normal', null, true) }}
+```
 
 ### Conditional Font Loading
 

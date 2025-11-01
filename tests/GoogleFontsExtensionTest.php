@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeuralGlitch\GoogleFonts\Tests;
 
 use NeuralGlitch\GoogleFonts\Twig\GoogleFontsExtension;
+use NeuralGlitch\GoogleFonts\Twig\GoogleFontsRuntime;
 use PHPUnit\Framework\TestCase;
 use Twig\TwigFunction;
 
@@ -12,7 +13,7 @@ final class GoogleFontsExtensionTest extends TestCase
 {
     public function testGetFunctionsReturnsTwigFunctions(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsExtension();
         $functions = $extension->getFunctions();
 
         self::assertIsArray($functions);
@@ -22,7 +23,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsWithStringWeights(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         $html = $extension->renderFonts('Ubuntu', '300 400 500 700');
 
@@ -36,7 +37,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsWithArrayWeights(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         $html = $extension->renderFonts('Roboto', [300, 400, 500]);
 
@@ -46,7 +47,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsWithStyles(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         $html = $extension->renderFonts('Open Sans', '400 700', 'normal italic');
 
@@ -56,7 +57,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsWithCustomDisplay(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         $html = $extension->renderFonts('Roboto', '400', 'normal', 'block');
 
@@ -65,7 +66,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsUsesDefaultDisplay(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, ['display' => 'fallback']);
+        $extension = new GoogleFontsRuntime('dev', false, null, ['display' => 'fallback']);
 
         $html = $extension->renderFonts('Roboto', '400');
 
@@ -74,7 +75,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsIncludesPreconnectByDefault(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         $html = $extension->renderFonts('Roboto', '400');
 
@@ -85,7 +86,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsCanDisablePreconnect(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, ['preconnect' => false]);
+        $extension = new GoogleFontsRuntime('dev', false, null, ['preconnect' => false]);
 
         $html = $extension->renderFonts('Roboto', '400');
 
@@ -95,7 +96,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsGeneratesCssVariables(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         $html = $extension->renderFonts('Ubuntu', '400');
 
@@ -107,7 +108,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsWithSpacesInFontName(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         $html = $extension->renderFonts('Open Sans', '400');
 
@@ -117,7 +118,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsSelectsBoldWeight(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         // With weight >= 700, should use it for bold
         $html = $extension->renderFonts('Ubuntu', '300 400 800');
@@ -127,7 +128,7 @@ final class GoogleFontsExtensionTest extends TestCase
 
     public function testRenderFontsSelectsHeadingWeight(): void
     {
-        $extension = new GoogleFontsExtension('dev', false, null, []);
+        $extension = new GoogleFontsRuntime('dev', false, null, []);
 
         // With weight > 500, should use it for headings
         $html = $extension->renderFonts('Ubuntu', '300 400 600');

@@ -28,8 +28,13 @@ final class FontDownloader
      *
      * @return array{files: array<string, string>, css: string, cssPath: string, stylesheetPath: string, stylesheetCss: string} Font files and CSS content
      */
-    public function downloadFont(string $fontName, array $weights, array $styles, string $display = 'swap'): array
-    {
+    public function downloadFont(
+        string $fontName,
+        array $weights,
+        array $styles,
+        string $display = 'swap',
+        bool $monospace = false
+    ): array {
         // Ensure fonts directory exists
         $this->filesystem->mkdir($this->fontsDir, 0755);
 
@@ -88,7 +93,7 @@ final class FontDownloader
         $this->filesystem->dumpFile($cssPath, $processedCss);
 
         // Generate and save stylesheet with intelligent CSS rules
-        $stylesheetCss = $this->generateStylesheetCss($fontName, $weights, $styles);
+        $stylesheetCss = $this->generateStylesheetCss($fontName, $weights, $styles, $monospace);
         $stylesheetPath = $fontDir . '/' . FontVariantHelper::sanitizeFontName($fontName) . '-styles.css';
         $this->filesystem->dumpFile($stylesheetPath, $stylesheetCss);
 
@@ -107,55 +112,74 @@ final class FontDownloader
      * @param array<int|string> $weights
      * @param array<string>     $styles
      */
-    private function generateStylesheetCss(string $fontName, array $weights, array $styles): string
-    {
+    private function generateStylesheetCss(
+        string $fontName,
+        array $weights,
+        array $styles,
+        bool $monospace = false
+    ): string {
         $fontVar = '--font-family-' . FontVariantHelper::sanitizeFontName($fontName);
-        $fontFamily = sprintf("'%s', sans-serif", $fontName);
+        $fallbackFamily = $monospace ? 'monospace' : 'sans-serif';
+        $fontFamily = sprintf("'%s', %s", $fontName, $fallbackFamily);
 
         // Determine weights
         $defaultWeight = !empty($weights) ? (int) reset($weights) : 400;
-
-        // Find heading weight (first weight > 500, or 700)
-        $headingWeight = 700;
-        foreach ($weights as $weight) {
-            $w = (int) $weight;
-            if ($w > 500) {
-                $headingWeight = $w;
-
-                break;
-            }
-        }
-
-        // Find bold weight (first weight >= 700, or 700)
-        $boldWeight = 700;
-        foreach ($weights as $weight) {
-            $w = (int) $weight;
-            if ($w >= 700) {
-                $boldWeight = $w;
-
-                break;
-            }
-        }
 
         $lines = [
             ':root {',
             "  {$fontVar}: {$fontFamily};",
             '}',
             '',
-            'body {',
-            "  font-family: var({$fontVar});",
-            "  font-weight: {$defaultWeight};",
-            '}',
-            '',
-            'h1, h2, h3, h4, h5, h6 {',
-            "  font-family: var({$fontVar});",
-            "  font-weight: {$headingWeight};",
-            '}',
-            '',
-            'strong, b {',
-            "  font-weight: {$boldWeight};",
-            '}',
         ];
+
+        if ($monospace) {
+            // Apply to code elements
+            $lines = array_merge($lines, [
+                'code, pre, kbd, samp, var, tt {',
+                "  font-family: var({$fontVar});",
+                "  font-weight: {$defaultWeight};",
+                '}',
+            ]);
+        } else {
+            // Find heading weight (first weight > 500, or 700)
+            $headingWeight = 700;
+            foreach ($weights as $weight) {
+                $w = (int) $weight;
+                if ($w > 500) {
+                    $headingWeight = $w;
+
+                    break;
+                }
+            }
+
+            // Find bold weight (first weight >= 700, or 700)
+            $boldWeight = 700;
+            foreach ($weights as $weight) {
+                $w = (int) $weight;
+                if ($w >= 700) {
+                    $boldWeight = $w;
+
+                    break;
+                }
+            }
+
+            // Apply to body and headings
+            $lines = array_merge($lines, [
+                'body {',
+                "  font-family: var({$fontVar});",
+                "  font-weight: {$defaultWeight};",
+                '}',
+                '',
+                'h1, h2, h3, h4, h5, h6 {',
+                "  font-family: var({$fontVar});",
+                "  font-weight: {$headingWeight};",
+                '}',
+                '',
+                'strong, b {',
+                "  font-weight: {$boldWeight};",
+                '}',
+            ]);
+        }
 
         return implode("\n", $lines);
     }
