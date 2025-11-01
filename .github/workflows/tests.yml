@@ -15,16 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         php: [ '8.1', '8.2', '8.3', '8.4' ]
-        symfony: [ '6.4.*', '7.0.*', '7.1.*', '7.2.*', '7.3.*', '7.4.*@dev', '8.0.*@dev' ]
-        stability: [ 'stable' ]
-        include:
-          # Test beta/dev versions on latest PHP
-          - php: '8.4'
-            symfony: '7.4.x-dev'
-            stability: 'dev'
-          - php: '8.4'
-            symfony: '8.0.x-dev'
-            stability: 'dev'
+        symfony: [ '6.4.*', '7.0.*', '7.1.*', '7.2.*', '7.3.*' ]
         exclude:
           # Symfony 7.x requires PHP 8.2+
           - php: '8.1'
@@ -35,15 +26,6 @@ jobs:
             symfony: '7.2.*'
           - php: '8.1'
             symfony: '7.3.*'
-          - php: '8.1'
-            symfony: '7.4.*@dev'
-          # Symfony 8.0 requires PHP 8.4+
-          - php: '8.1'
-            symfony: '8.0.*@dev'
-          - php: '8.2'
-            symfony: '8.0.*@dev'
-          - php: '8.3'
-            symfony: '8.0.*@dev'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -69,41 +51,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ "${{ matrix.stability }}" = "dev" ]; then
-            composer config minimum-stability dev
-            composer config prefer-stable false
-            # Remove dev dependencies that don't support Symfony 8.0 yet
-            composer remove friendsofphp/php-cs-fixer phpstan/phpstan --dev --no-update
-          fi
-          composer require \
-            "symfony/config:${{ matrix.symfony }}" \
-            "symfony/console:${{ matrix.symfony }}" \
-            "symfony/dependency-injection:${{ matrix.symfony }}" \
-            "symfony/filesystem:${{ matrix.symfony }}" \
-            "symfony/finder:${{ matrix.symfony }}" \
-            "symfony/http-client:${{ matrix.symfony }}" \
-            "symfony/http-kernel:${{ matrix.symfony }}" \
-            "symfony/routing:${{ matrix.symfony }}" \
-            "symfony/twig-bundle:${{ matrix.symfony }}" \
-            --no-interaction --no-update
-          composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
+          composer require "symfony/framework-bundle:${{ matrix.symfony }}" --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-progress
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --testdox
-        continue-on-error: ${{ contains(matrix.symfony, 'dev') || matrix.stability == 'dev' }}
 
       - name: Report success
         if: success()
         run: echo "All tests passed for PHP ${{ matrix.php }} with Symfony ${{ matrix.symfony }}"
-      
-      - name: Report dev version result
-        if: ${{ contains(matrix.symfony, 'dev') || matrix.stability == 'dev' }}
-        run: |
-          if [ $? -eq 0 ]; then
-            echo "✅ Dev version tests passed for Symfony ${{ matrix.symfony }}"
-          else
-            echo "⚠️ Dev version tests failed for Symfony ${{ matrix.symfony }} (this is acceptable)"
-          fi
   
   coverage:
     name: Code Coverage
