@@ -70,8 +70,18 @@ jobs:
       - name: Install dependencies
         run: |
           composer config minimum-stability ${{ matrix.stability }}
-          composer require "symfony/framework-bundle:${{ matrix.symfony }}" --no-interaction --no-update
-          composer update --prefer-dist --no-interaction --no-progress --prefer-${{ matrix.stability }}
+          composer require \
+            "symfony/config:${{ matrix.symfony }}" \
+            "symfony/console:${{ matrix.symfony }}" \
+            "symfony/dependency-injection:${{ matrix.symfony }}" \
+            "symfony/filesystem:${{ matrix.symfony }}" \
+            "symfony/finder:${{ matrix.symfony }}" \
+            "symfony/http-client:${{ matrix.symfony }}" \
+            "symfony/http-kernel:${{ matrix.symfony }}" \
+            "symfony/routing:${{ matrix.symfony }}" \
+            "symfony/twig-bundle:${{ matrix.symfony }}" \
+            --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-progress
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --testdox
