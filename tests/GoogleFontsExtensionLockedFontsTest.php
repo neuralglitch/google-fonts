@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NeuralGlitch\GoogleFonts\Tests;
 
-use NeuralGlitch\GoogleFonts\Twig\GoogleFontsExtension;
+use NeuralGlitch\GoogleFonts\Twig\GoogleFontsRuntime;
 use PHPUnit\Framework\TestCase;
 
 final class GoogleFontsExtensionLockedFontsTest extends TestCase
@@ -38,7 +38,7 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         ];
         file_put_contents($this->manifestFile, json_encode($manifest));
 
-        $extension = new GoogleFontsExtension(
+        $extension = new GoogleFontsRuntime(
             'prod',
             true,
             $this->manifestFile,
@@ -67,7 +67,7 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         ];
         file_put_contents($this->manifestFile, json_encode($manifest));
 
-        $extension = new GoogleFontsExtension(
+        $extension = new GoogleFontsRuntime(
             'prod',
             false, // use_locked_fonts = false
             $this->manifestFile,
@@ -95,7 +95,7 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         ];
         file_put_contents($this->manifestFile, json_encode($manifest));
 
-        $extension = new GoogleFontsExtension(
+        $extension = new GoogleFontsRuntime(
             'dev', // dev environment
             true,
             $this->manifestFile,
@@ -118,7 +118,7 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         ];
         file_put_contents($this->manifestFile, json_encode($manifest));
 
-        $extension = new GoogleFontsExtension(
+        $extension = new GoogleFontsRuntime(
             'prod',
             true,
             $this->manifestFile,

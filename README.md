@@ -4,13 +4,17 @@
 
 ### Google Fonts integration for Symfony
 
-[![Latest Version](https://img.shields.io/packagist/v/neuralglitch/google-fonts.svg?style=flat-square)](https://packagist.org/packages/neuralglitch/google-fonts)
-[![PHP Version](https://img.shields.io/packagist/php-v/neuralglitch/google-fonts.svg?style=flat-square)](https://packagist.org/packages/neuralglitch/google-fonts)
-[![License](https://img.shields.io/packagist/l/neuralglitch/google-fonts.svg?style=flat-square)](https://packagist.org/packages/neuralglitch/google-fonts)
+[![PHP Version](https://img.shields.io/badge/PHP-8.1+-777BB4?style=flat&logo=php&logoColor=white)](composer.json)
+[![Symfony](https://img.shields.io/badge/Symfony-6.4+-343434?style=flat&logo=symfony&logoColor=white)](composer.json)
 <br/>
-[![PHPStan](https://img.shields.io/badge/PHPStan-Level%20max-brightgreen.svg?style=flat-square)](phpstan.neon.dist)
-[![Tests](https://github.com/neuralglitch/google-fonts/actions/workflows/tests.yml/badge.svg)](https://github.com/neuralglitch/google-fonts/actions/workflows/tests.yml)
-[![Static Analysis](https://github.com/neuralglitch/google-fonts/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/neuralglitch/google-fonts/actions/workflows/static-analysis.yml)
+[![Tests](https://github.com/neuralglitch/google-fonts/actions/workflows/tests.yml/badge.svg?style=flat&logo=github)](https://github.com/neuralglitch/google-fonts/actions/workflows/tests.yml)
+[![Code Coverage](https://img.shields.io/badge/PHPUnit-93.75%25-brightgreen?style=flat&logo=codecov&logoColor=white)](build/coverage/index.html)
+[![Static Analysis](https://github.com/neuralglitch/google-fonts/actions/workflows/static-analysis.yml/badge.svg?style=flat&logo=github)](https://github.com/neuralglitch/google-fonts/actions/workflows/static-analysis.yml)
+[![PHPStan Level](https://img.shields.io/badge/PHPStan-level%20max-brightgreen?style=flat&logo=php&logoColor=white)](phpstan.neon.dist)
+<br/>
+[![Latest Version](https://img.shields.io/packagist/v/neuralglitch/google-fonts.svg?style=flat&logo=packagist&logoColor=white)](https://packagist.org/packages/neuralglitch/google-fonts)
+[![Total Downloads](https://img.shields.io/packagist/dt/neuralglitch/google-fonts.svg?style=flat&logo=packagist&logoColor=white)](https://packagist.org/packages/neuralglitch/google-fonts)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 </div>
 
@@ -36,7 +40,11 @@ composer require neuralglitch/google-fonts
 ```twig
 {# templates/base.html.twig #}
 <head>
+  {# Normal font for body and headings #}
   {{ google_fonts('Ubuntu', '300 400 500 700', 'normal italic') }}
+  
+  {# Monospace font for code elements #}
+  {{ google_fonts('JetBrains Mono', '400 500', 'normal', null, true) }}
 </head>
 ```
 
@@ -62,12 +70,12 @@ The bundle automatically switches to locked fonts in production (via `when@prod`
 - Symfony 6.4, 7.x, or 8.x
 - Twig 3.0 or higher
 
-## License
-
-MIT - see [LICENSE](LICENSE) for details.
-
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/neuralglitch/google-fonts/issues)
-- **Security**: [SECURITY.md](.github/SECURITY.md)
-- **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- [GitHub Issues](https://github.com/neuralglitch/google-fonts/issues)
+- [Security](.github/SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+
+## License
+
+[MIT](LICENSE)

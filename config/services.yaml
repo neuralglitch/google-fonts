@@ -27,13 +27,17 @@ services:
       $fontDownloader: '@NeuralGlitch\GoogleFonts\Service\FontDownloader'
 
   NeuralGlitch\GoogleFonts\Twig\GoogleFontsExtension:
+    tags:
+      - { name: 'twig.extension' }
+
+  NeuralGlitch\GoogleFonts\Twig\GoogleFontsRuntime:
     arguments:
       $environment: '%kernel.environment%'
       $useLockedFonts: '%google_fonts.use_locked_fonts%'
       $manifestFile: '%google_fonts.manifest_file%'
       $defaults: '%google_fonts.defaults%'
     tags:
-      - { name: 'twig.extension' }
+      - { name: 'twig.runtime' }
 
   NeuralGlitch\GoogleFonts\Command\FontsLockCommand:
     arguments:

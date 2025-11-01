@@ -1,0 +1,32 @@
+# Export Configuration
+# Exclude development and test files from Packagist/Composer downloads
+
+/tests export-ignore
+/docs export-ignore
+/.github export-ignore
+/docker export-ignore
+/build export-ignore
+
+# Configuration files
+/.dockerignore export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.gitconfig export-ignore
+/.gitignore export-ignore
+/.php-cs-fixer.php export-ignore
+/.php-cs-fixer.cache export-ignore
+/.phpunit.result.cache export-ignore
+/phpstan.neon.dist export-ignore
+/phpunit.xml.dist export-ignore
+/Makefile export-ignore
+/compose.yml export-ignore
+/docker-compose.yml export-ignore
+
+# Documentation files
+/CONTRIBUTING.md export-ignore
+/CHANGELOG.md export-ignore
+/REPO_REVIEW.md export-ignore
+
+# Git files
+/.git export-ignore
+

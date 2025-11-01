@@ -38,7 +38,15 @@ final class FontLockManager
             ->name('*.twig');
 
         foreach ($finder as $file) {
-            $content = $this->filesystem->readFile($file->getPathname());
+            // Use Filesystem::readFile() if available (Symfony 7.1+), otherwise file_get_contents()
+            if (method_exists($this->filesystem, 'readFile')) {
+                $content = $this->filesystem->readFile($file->getPathname());
+            } else {
+                $content = file_get_contents($file->getPathname());
+                if (false === $content) {
+                    continue;
+                }
+            }
 
             // Match google_fonts() function calls
             // Pattern: google_fonts('Font Name', 'weights', 'styles', 'display')
