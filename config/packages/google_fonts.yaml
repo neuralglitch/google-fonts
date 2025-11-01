@@ -1,4 +1,8 @@
 google_fonts:
+  # Get your free API key at: https://console.cloud.google.com/apis/credentials
+  # Enable "Google Fonts Developer API" for your project
+  api_key: '%env(GOOGLE_FONTS_API_KEY)%'
+  
   use_locked_fonts: false
   fonts_dir: '%kernel.project_dir%/assets/fonts'
   manifest_file: '%kernel.project_dir%/assets/fonts.json'
@@ -12,4 +16,11 @@ when@prod:
     use_locked_fonts: true
     defaults:
       preconnect: false  # Not needed for local fonts
+
+# Development with locked fonts (optional - for testing production mode)
+# when@dev:
+#   google_fonts:
+#     use_locked_fonts: true
+#     defaults:
+#       preconnect: false
 

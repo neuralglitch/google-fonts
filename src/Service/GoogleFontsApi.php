@@ -11,9 +11,26 @@ final class GoogleFontsApi
     private const API_BASE = 'https://www.googleapis.com/webfonts/v1/webfonts';
     private const CSS_API = 'https://fonts.googleapis.com/css2';
 
+    /** @var array<string, array{data: mixed, expires: int}>|null */
+    private static ?array $cache = null;
+    private static int $cacheTtl = 3600; // 1 hour
+
     public function __construct(
-        private readonly HttpClientInterface $httpClient
+        private readonly HttpClientInterface $httpClient,
+        private readonly ?string $apiKey = null,
+        ?int $cacheTtl = null
     ) {
+        if (null !== $cacheTtl) {
+            self::$cacheTtl = $cacheTtl;
+        }
+    }
+
+    /**
+     * Clear the API cache.
+     */
+    public static function clearCache(): void
+    {
+        self::$cache = null;
     }
 
     /**
@@ -23,21 +40,38 @@ final class GoogleFontsApi
      */
     public function searchFonts(string $query, int $maxResults = 20): array
     {
-        $response = $this->httpClient->request('GET', self::API_BASE, [
-            'query' => [
-                'key' => '', // Public API, no key needed for basic access
-                'sort' => 'popularity',
-            ],
-        ]);
+        if (!$this->apiKey) {
+            throw new \RuntimeException('Google Fonts API key is required. Get your free API key at https://console.cloud.google.com/apis/credentials and configure it in config/packages/google_fonts.yaml under "api_key"');
+        }
 
-        $data = $response->toArray();
-        $fonts = $data['items'] ?? [];
+        // Check cache for full fonts list
+        $cacheKey = 'fonts_list';
+        $cached = $this->getFromCache($cacheKey);
+        if (null !== $cached && is_array($cached)) {
+            $allFonts = $cached;
+        } else {
+            $response = $this->httpClient->request('GET', self::API_BASE, [
+                'query' => [
+                    'key' => $this->apiKey,
+                    'sort' => 'popularity',
+                ],
+            ]);
 
+            $data = $response->toArray();
+            $allFonts = $data['items'] ?? [];
+
+            // Cache the full result
+            $this->putInCache($cacheKey, $allFonts);
+        }
+
+        // Apply filtering AFTER caching
         if ('' !== $query) {
             $queryLower = strtolower($query);
-            $fonts = array_filter($fonts, function (array $font) use ($queryLower): bool {
+            $fonts = array_filter($allFonts, function (array $font) use ($queryLower): bool {
                 return false !== stripos($font['family'], $queryLower);
             });
+        } else {
+            $fonts = $allFonts;
         }
 
         return array_slice($fonts, 0, $maxResults);
@@ -50,7 +84,16 @@ final class GoogleFontsApi
      */
     public function getFontMetadata(string $fontName): ?array
     {
-        $response = $this->httpClient->request('GET', self::API_BASE);
+        if (!$this->apiKey) {
+            throw new \RuntimeException('Google Fonts API key is required. Get your free API key at https://console.cloud.google.com/apis/credentials and configure it in config/packages/google_fonts.yaml under "api_key"');
+        }
+
+        $response = $this->httpClient->request('GET', self::API_BASE, [
+            'query' => [
+                'key' => $this->apiKey,
+                'sort' => 'popularity',
+            ],
+        ]);
 
         $data = $response->toArray();
         $fonts = $data['items'] ?? [];
@@ -138,5 +181,45 @@ final class GoogleFontsApi
         ]);
 
         return $response->getContent();
+    }
+
+    /**
+     * Get data from cache.
+     *
+     * @return mixed|null
+     */
+    private function getFromCache(string $key): mixed
+    {
+        if (null === self::$cache) {
+            self::$cache = [];
+        }
+
+        if (!isset(self::$cache[$key])) {
+            return null;
+        }
+
+        $entry = self::$cache[$key];
+        if ($entry['expires'] < time()) {
+            unset(self::$cache[$key]);
+
+            return null;
+        }
+
+        return $entry['data'];
+    }
+
+    /**
+     * Put data in cache.
+     */
+    private function putInCache(string $key, mixed $data): void
+    {
+        if (null === self::$cache) {
+            self::$cache = [];
+        }
+
+        self::$cache[$key] = [
+            'data' => $data,
+            'expires' => time() + self::$cacheTtl,
+        ];
     }
 }

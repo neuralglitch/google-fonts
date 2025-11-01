@@ -13,6 +13,8 @@ services:
   NeuralGlitch\GoogleFonts\Service\GoogleFontsApi:
     arguments:
       $httpClient: '@http_client'
+      $apiKey: '%google_fonts.api_key%'
+      $cacheTtl: '%google_fonts.cache_ttl%'
 
   NeuralGlitch\GoogleFonts\Service\FontDownloader:
     arguments:
@@ -32,10 +34,10 @@ services:
 
   NeuralGlitch\GoogleFonts\Twig\GoogleFontsRuntime:
     arguments:
-      $environment: '%kernel.environment%'
       $useLockedFonts: '%google_fonts.use_locked_fonts%'
       $manifestFile: '%google_fonts.manifest_file%'
       $defaults: '%google_fonts.defaults%'
+      $assetMapper: '@asset_mapper'
     tags:
       - { name: 'twig.runtime' }
 
@@ -46,5 +48,20 @@ services:
   NeuralGlitch\GoogleFonts\Command\FontsWarmCacheCommand:
     arguments:
       $manifestFile: '%google_fonts.manifest_file%'
+      $filesystem: '@Symfony\Component\Filesystem\Filesystem'
+
+  NeuralGlitch\GoogleFonts\Command\FontsStatusCommand:
+    arguments:
+      $environment: '%kernel.environment%'
+      $useLockedFonts: '%google_fonts.use_locked_fonts%'
+      $manifestFile: '%google_fonts.manifest_file%'
+      $fontsDir: '%google_fonts.fonts_dir%'
+
+  NeuralGlitch\GoogleFonts\Command\FontsPruneCommand:
+    arguments:
+      $projectDir: '%kernel.project_dir%'
+      $fontsDir: '%google_fonts.fonts_dir%'
+      $manifestFile: '%google_fonts.manifest_file%'
+      $lockManager: '@NeuralGlitch\GoogleFonts\Service\FontLockManager'
       $filesystem: '@Symfony\Component\Filesystem\Filesystem'
 

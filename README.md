@@ -54,7 +54,24 @@ composer require neuralglitch/google-fonts
 php bin/console gfonts:lock
 ```
 
+This downloads fonts to `assets/fonts/` (served by AssetMapper in dev, compiled to `public/` in prod).
+
+Each font gets a single CSS file containing both `@font-face` declarations and intelligent styling rules.
+
 The bundle automatically switches to locked fonts in production (via `when@prod` configuration).
+
+**Troubleshooting:** If locked fonts aren't being used in production, see `DEBUG_LOCKED_FONTS.md`.
+
+### 3. Optional: Configure API key for search/import commands
+
+```bash
+# .env.local
+GOOGLE_FONTS_API_KEY=your_api_key_here
+```
+
+Get your free API key at [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+
+**Note**: The API key is only required for `gfonts:search` and `gfonts:import` commands. The `google_fonts()` Twig function and `gfonts:lock` command do NOT require an API key.
 
 ## Documentation
 

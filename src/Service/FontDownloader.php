@@ -20,13 +20,18 @@ final class FontDownloader
     ) {
     }
 
+    public function getApi(): GoogleFontsApi
+    {
+        return $this->api;
+    }
+
     /**
      * Download and save a font.
      *
      * @param array<int|string> $weights
      * @param array<string>     $styles
      *
-     * @return array{files: array<string, string>, css: string, cssPath: string, stylesheetPath: string, stylesheetCss: string} Font files and CSS content
+     * @return array{files: array<string, string>, css: string, cssPath: string, downloadedWeights: array<int>} Font files and CSS content
      */
     public function downloadFont(
         string $fontName,
@@ -38,8 +43,7 @@ final class FontDownloader
         // Ensure fonts directory exists
         $this->filesystem->mkdir($this->fontsDir, 0755);
 
-        $fontDir = $this->fontsDir . '/' . FontVariantHelper::sanitizeFontName($fontName);
-        $this->filesystem->mkdir($fontDir, 0755);
+        $sanitizedName = FontVariantHelper::sanitizeFontName($fontName);
 
         try {
             // Download CSS
@@ -48,11 +52,17 @@ final class FontDownloader
             throw new FontDownloadException(sprintf('Failed to download CSS for font "%s": %s', $fontName, $e->getMessage()), 0, $e);
         }
 
+        // Prepare weight and style mappings for file naming
+        $weightsMap = array_map(fn ($w) => (int) $w, $weights);
+        $hasItalic = in_array('italic', $styles, true);
+
         // Extract font URLs from CSS and download files
         $files = [];
+        $downloadedWeights = []; // Track actually downloaded weights
+        $weightIndex = 0;
         $processedCss = preg_replace_callback(
             '/url\(([^)]+)\)/',
-            function (array $matches) use (&$files, $fontDir, $fontName): string {
+            function (array $matches) use (&$files, &$downloadedWeights, &$weightIndex, $sanitizedName, $weightsMap, $hasItalic, $monospace): string {
                 $url = trim($matches[1], '\'"');
 
                 try {
@@ -63,22 +73,53 @@ final class FontDownloader
                     throw new FontDownloadException(sprintf('Failed to download font file "%s": %s', $url, $e->getMessage()), 0, $e);
                 }
 
-                // Determine file extension and name
-                $urlParts = parse_url($url);
-                $pathParts = explode('/', $urlParts['path'] ?? '');
-                $filename = end($pathParts);
-
-                if (!$filename || !str_contains($filename, '.')) {
-                    // Generate filename from URL
-                    $filename = FontVariantHelper::sanitizeFontName($fontName) . '-' . md5($url) . '.woff2';
+                // Determine file extension
+                $extension = '.woff2'; // Default to woff2
+                if (preg_match('/\.(woff2?|ttf|eot|otf)$/i', $url, $extMatch)) {
+                    $extension = strtolower($extMatch[0]);
                 }
 
-                $filePath = $fontDir . '/' . $filename;
+                // Determine weight and style from URL or use from array
+                $weight = $weightsMap[$weightIndex % count($weightsMap)] ?? 400;
+                $isItalic = $hasItalic && (1 === $weightIndex % 2);
+
+                // Generate descriptive filename: roboto-400.woff2, roboto-700-italic.woff2, jetbrains-500-mono.woff2
+                // Extract base name without "mono" suffix if font name contains mono keywords
+                $baseName = $sanitizedName;
+                if ($monospace && preg_match('/-mono$/', $baseName)) {
+                    $baseName = preg_replace('/-mono$/', '', $baseName);
+                }
+
+                $parts = [$baseName, (string) $weight];
+                if ($isItalic) {
+                    $parts[] = 'italic';
+                }
+                if ($monospace) {
+                    $parts[] = 'mono';
+                }
+                $baseFilename = implode('-', $parts) . $extension;
+
+                // Handle duplicate filenames by adding a counter
+                $filename = $baseFilename;
+                $counter = 1;
+                while (isset($files[$filename])) {
+                    $filename = implode('-', $parts) . '-' . $counter . $extension;
+                    ++$counter;
+                }
+
+                $filePath = $this->fontsDir . '/' . $filename;
                 $this->filesystem->dumpFile($filePath, $content);
 
                 $files[$filename] = $filePath;
 
-                // Update CSS to use relative path
+                // Track the actual weight that was downloaded
+                if (!in_array($weight, $downloadedWeights, true)) {
+                    $downloadedWeights[] = $weight;
+                }
+
+                ++$weightIndex;
+
+                // Update CSS to use relative path (relative to the CSS file)
                 return sprintf('url("./%s")', $filename);
             },
             $css
@@ -88,21 +129,24 @@ final class FontDownloader
             throw new FontDownloadException('Failed to process CSS file URLs');
         }
 
-        // Save CSS file (with @font-face declarations)
-        $cssPath = $fontDir . '/' . FontVariantHelper::sanitizeFontName($fontName) . '.css';
-        $this->filesystem->dumpFile($cssPath, $processedCss);
-
-        // Generate and save stylesheet with intelligent CSS rules
+        // Generate intelligent CSS rules
         $stylesheetCss = $this->generateStylesheetCss($fontName, $weights, $styles, $monospace);
-        $stylesheetPath = $fontDir . '/' . FontVariantHelper::sanitizeFontName($fontName) . '-styles.css';
-        $this->filesystem->dumpFile($stylesheetPath, $stylesheetCss);
+
+        // Combine @font-face declarations and intelligent styles into one CSS file
+        $combinedCss = $processedCss . "\n\n" . $stylesheetCss;
+
+        // Save combined CSS file
+        $cssPath = $this->fontsDir . '/' . $sanitizedName . '.css';
+        $this->filesystem->dumpFile($cssPath, $combinedCss);
+
+        // Sort downloaded weights
+        sort($downloadedWeights);
 
         return [
             'files' => $files,
-            'css' => $processedCss,
+            'css' => $combinedCss,
             'cssPath' => $cssPath,
-            'stylesheetPath' => $stylesheetPath,
-            'stylesheetCss' => $stylesheetCss,
+            'downloadedWeights' => $downloadedWeights,
         ];
     }
 

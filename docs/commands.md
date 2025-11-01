@@ -1,351 +1,166 @@
-# Command Reference
+# Commands
 
 ## Overview
 
-Google Fonts Bundle provides four console commands for managing fonts:
-
-- `gfonts:search` - Search Google Fonts catalog
-- `gfonts:import` - Download a specific font locally
-- `gfonts:lock` - Scan templates and lock all used fonts
-- `gfonts:warm-cache` - Pre-download fonts from manifest
+- **`gfonts:search`** - Search Google Fonts catalog
+- **`gfonts:import`** - Download a specific font
+- **`gfonts:lock`** - Scan templates and lock all fonts
+- **`gfonts:status`** - Show configuration and locked fonts status
+- **`gfonts:warm-cache`** - Pre-download fonts from manifest
 
 ## gfonts:search
 
-Search the Google Fonts catalog by name.
-
-### Usage
+Search the Google Fonts catalog.
 
 ```bash
 php bin/console gfonts:search [query] [--max-results=20]
 ```
 
-### Arguments
-
-- `query` (optional) - Search query (leave empty to show popular fonts)
-
-### Options
-
-- `--max-results`, `-m` - Maximum number of results (default: 20)
-
-### Examples
-
+**Examples:**
 ```bash
 # Show popular fonts
 php bin/console gfonts:search
 
-# Search for "Roboto"
-php bin/console gfonts:search Roboto
-
-# Search for "Open Sans"
-php bin/console gfonts:search "Open Sans"
+# Search for specific font
+php bin/console gfonts:search "Roboto"
 
 # Limit results
-php bin/console gfonts:search Ubuntu --max-results=10
+php bin/console gfonts:search Ubuntu -m 10
 ```
 
-### Output
-
-```
-Search Google Fonts
-
-Search Results for: "Ubuntu"
-
-+------------+----------+------------------------------+-----------+
-| Font Name  | Variants | Available Variants           | Category  |
-+------------+----------+------------------------------+-----------+
-| Ubuntu     | 14       | 300, 300italic, regular, ... | sans-serif|
-| Ubuntu ... | 8        | regular, italic, 700, 700... | monospace |
-+------------+----------+------------------------------+-----------+
-```
+**Requires:** Google Fonts API key (configure in `GOOGLE_FONTS_API_KEY` env var)
 
 ## gfonts:import
 
-Download a specific font and store it locally.
-
-### Usage
+Download a specific font.
 
 ```bash
 php bin/console gfonts:import <name> [--weights] [--styles] [--display]
 ```
 
-### Arguments
-
-- `name` (required) - Font family name (e.g., "Ubuntu", "Roboto")
-
-### Options
-
-- `--weights`, `-w` - Font weights, comma or space-separated (default: "400")
-- `--styles`, `-s` - Font styles, comma or space-separated (default: "normal")
-- `--display`, `-d` - Font display value (default: "swap")
-
-### Examples
-
+**Examples:**
 ```bash
 # Import single weight
 php bin/console gfonts:import Ubuntu
 
 # Import multiple weights
-php bin/console gfonts:import Ubuntu --weights="300,400,500,700"
+php bin/console gfonts:import Ubuntu -w "300,400,700"
 
-# Import with italic styles
-php bin/console gfonts:import "Open Sans" --weights="400,700" --styles="normal,italic"
-
-# Custom display strategy
-php bin/console gfonts:import Roboto --weights="400" --display="optional"
-
-# Space-separated (alternative syntax)
-php bin/console gfonts:import Ubuntu --weights="300 400 700"
+# With italic styles
+php bin/console gfonts:import "Open Sans" -w "400,700" -s "normal,italic"
 ```
 
-### Output
+**Requires:** Google Fonts API key
 
-```
-Importing font: Ubuntu
-
-Configuration
--------------
-
-* Font: Ubuntu
-* Weights: 300, 400, 500, 700
-* Styles: normal, italic
-* Display: swap
-
-[OK] Font "Ubuntu" imported successfully!
-     Files saved: 8
-     CSS file: /path/to/assets/fonts/ubuntu/ubuntu.css
-```
-
-### Downloaded Files
-
-The command creates:
-
-```
-assets/fonts/ubuntu/
-  - ubuntu.css              # @font-face declarations
-  - ubuntu-styles.css       # Intelligent CSS rules
-  - ubuntu-300.woff2        # Font files
-  - ubuntu-400.woff2
-  - ubuntu-500.woff2
-  - ubuntu-700.woff2
-  - ubuntu-300italic.woff2
-  - ubuntu-400italic.woff2
-  - ubuntu-500italic.woff2
-  - ubuntu-700italic.woff2
-```
+**Output shows:**
+- Requested vs downloaded weights
+- Warning if some weights unavailable
+- File locations
 
 ## gfonts:lock
 
-Scan Twig templates for `google_fonts()` calls and download all referenced fonts.
-
-### Usage
+Scan templates and lock all used fonts.
 
 ```bash
 php bin/console gfonts:lock [template-dirs]... [--force]
 ```
 
-### Arguments
-
-- `template-dirs` (optional) - Template directories to scan (default: `templates/`, `views/`)
-
-### Options
-
-- `--force`, `-f` - Force re-download even if fonts already exist
-
-### Examples
-
+**Examples:**
 ```bash
-# Scan default directories
+# Scan default directories (templates/, views/)
 php bin/console gfonts:lock
 
 # Scan specific directories
-php bin/console gfonts:lock templates/ views/
+php bin/console gfonts:lock templates/ custom/
 
 # Force re-download
 php bin/console gfonts:lock --force
 ```
 
-### Output
+**What it does:**
+1. Scans Twig templates for `google_fonts()` calls
+2. Downloads all referenced fonts
+3. Creates `assets/fonts.json` manifest
+4. Saves fonts to `assets/fonts/`
 
-```
-Lock Fonts
+**Output shows:**
+- Found fonts with weights/styles
+- Requested vs downloaded weights (with warnings)
+- File count and locations
 
-Scanning templates
-------------------
+## gfonts:status
 
-* templates/
-* views/
+Show configuration and locked fonts status.
 
-Found fonts
------------
-
-* Ubuntu (weights: 300, 400, 500, 700, styles: normal, italic)
-* Roboto (weights: 400, 700, styles: normal)
-* Open Sans (weights: 400, 600, styles: normal, italic)
-
-Downloading fonts
------------------
-
-[OK] Locked 3 font(s) successfully!
-
-[NOTE] Enable locked fonts in production by setting: google_fonts.use_locked_fonts: true
+```bash
+php bin/console gfonts:status
 ```
 
-### Generated Manifest
+**Output shows:**
+- Current environment (dev/prod/test)
+- Locked fonts configuration (enabled/disabled)
+- Manifest file status
+- List of locked fonts
+- Production readiness checks
 
-The command creates `assets/fonts.json`:
-
-```json
-{
-  "locked": true,
-  "generated_at": "2025-10-31T22:00:00+00:00",
-  "fonts": {
-    "Ubuntu": {
-      "weights": [300, 400, 500, 700],
-      "styles": ["normal", "italic"],
-      "files": ["ubuntu-300.woff2", "ubuntu-400.woff2", ...],
-      "css": "assets/fonts/ubuntu/ubuntu.css",
-      "stylesheet": "assets/fonts/ubuntu/ubuntu-styles.css"
-    },
-    "Roboto": {
-      "weights": [400, 700],
-      "styles": ["normal"],
-      "files": ["roboto-400.woff2", "roboto-700.woff2"],
-      "css": "assets/fonts/roboto/roboto.css",
-      "stylesheet": "assets/fonts/roboto/roboto-styles.css"
-    }
-  }
-}
-```
-
-### Template Scanning
-
-The command scans for patterns like:
-
-```twig
-{{ google_fonts('Ubuntu', '300 400 700') }}
-{{ google_fonts('Roboto', [400, 700], ['normal']) }}
-```
-
-And extracts:
-
-- Font family name
-- Weights (with defaults if omitted)
-- Styles (with defaults if omitted)
+**Use for debugging:**
+- Why locked fonts aren't being used
+- Which fonts are currently locked
+- Configuration verification
 
 ## gfonts:warm-cache
 
-Pre-download all fonts from the manifest file. Useful for CI/CD builds.
-
-### Usage
+Pre-download fonts from manifest (for CI/CD builds).
 
 ```bash
 php bin/console gfonts:warm-cache [--manifest]
 ```
 
-### Options
-
-- `--manifest`, `-m` - Path to manifest file (default: from config)
-
-### Examples
-
+**Examples:**
 ```bash
-# Warm cache from default manifest
+# Use default manifest
 php bin/console gfonts:warm-cache
 
-# Use custom manifest
-php bin/console gfonts:warm-cache --manifest=/path/to/fonts.json
+# Custom manifest path
+php bin/console gfonts:warm-cache -m /path/to/fonts.json
 ```
 
-### Output
+**Use case:** Download fonts during CI/CD build without scanning templates.
 
-```
-Warm Font Cache
+## Typical Workflow
 
-Found 3 font(s) in manifest
-
-3/3 [============================] 100%
-
-[OK] Successfully warmed cache for 3 font(s)
-```
-
-### Use Case: CI/CD
-
-In your CI/CD pipeline:
-
-```yaml
-# .gitlab-ci.yml
-build:
-  script:
-    - composer install
-    - php bin/console gfonts:warm-cache
-    - # ... rest of build
-```
-
-This ensures all fonts are downloaded during the build process.
-
-## Command Integration
-
-### Typical Workflow
-
-1. **Development**: Use `gfonts:search` to find fonts
-2. **Development**: Add fonts to templates with `google_fonts()`
-3. **Before Production**: Run `gfonts:lock` to download all fonts
-4. **Production Deploy**: Fonts are already locked and ready
-5. **CI/CD**: Use `gfonts:warm-cache` to pre-download during build
-
-### Example Deployment Script
-
+### Development
 ```bash
-#!/bin/bash
+# 1. Search for fonts
+php bin/console gfonts:search "Inter"
 
-# Lock all fonts used in templates
+# 2. Add to template
+# {{ google_fonts('Inter', '400 600') }}
+
+# 3. Develop (uses CDN automatically)
+```
+
+### Before Production
+```bash
+# Lock all fonts
 php bin/console gfonts:lock
 
-# Commit the manifest
-git add assets/fonts.json
-git commit -m "Lock fonts for production"
+# Check status
+php bin/console gfonts:status
 
-# Deploy with locked fonts
-# ...
+# Verify manifest
+cat assets/fonts.json
 ```
 
-## Error Handling
-
-### Common Errors
-
-**Error**: "No template directories found"
-
+### CI/CD Pipeline
 ```bash
-php bin/console gfonts:lock templates/
+composer install
+php bin/console gfonts:warm-cache  # Download from manifest
+php bin/console asset-map:compile   # Compile assets
 ```
-
-**Error**: "Font not found"
-
-Check font name spelling:
-
-```bash
-php bin/console gfonts:search "Font Name"
-```
-
-**Error**: "Manifest file not found"
-
-Run lock command first:
-
-```bash
-php bin/console gfonts:lock
-```
-
-**Error**: "Failed to download font"
-
-Check:
-
-- Internet connection
-- Google Fonts API availability
-- Font name is correct
 
 ## Next Steps
 
 - [Usage Guide](usage.md) - Using fonts in templates
 - [Configuration](configuration.md) - Configure the bundle
-- [Production Setup](production.md) - Deploy with locked fonts
-
+- [Production](production.md) - Production deployment

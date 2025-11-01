@@ -16,7 +16,7 @@ final class FontsSearchCommandTest extends TestCase
 {
     public function testConfigureSetArgumentsAndOptions(): void
     {
-        $api = new GoogleFontsApi(new MockHttpClient());
+        $api = new GoogleFontsApi(new MockHttpClient(), 'test-api-key');
         $command = new FontsSearchCommand($api);
 
         $definition = $command->getDefinition();
@@ -40,7 +40,7 @@ final class FontsSearchCommandTest extends TestCase
         $mockResponse = new MockResponse(false !== $jsonData ? $jsonData : '{}');
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $command = new FontsSearchCommand($api);
         $application = new Application();
@@ -66,7 +66,7 @@ final class FontsSearchCommandTest extends TestCase
         );
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $command = new FontsSearchCommand($api);
         $commandTester = new CommandTester($command);
@@ -88,7 +88,7 @@ final class FontsSearchCommandTest extends TestCase
         );
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $command = new FontsSearchCommand($api);
         $commandTester = new CommandTester($command);
@@ -101,7 +101,7 @@ final class FontsSearchCommandTest extends TestCase
     {
         $mockResponse = new MockResponse((string) json_encode(['items' => []]));
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $command = new FontsSearchCommand($api);
         $commandTester = new CommandTester($command);
@@ -114,9 +114,12 @@ final class FontsSearchCommandTest extends TestCase
 
     public function testExecuteHandlesApiException(): void
     {
+        // Clear cache to ensure API is called
+        GoogleFontsApi::clearCache();
+
         $mockResponse = new MockResponse('', ['http_code' => 500]);
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $command = new FontsSearchCommand($api);
         $commandTester = new CommandTester($command);

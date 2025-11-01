@@ -39,7 +39,6 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         file_put_contents($this->manifestFile, json_encode($manifest));
 
         $extension = new GoogleFontsRuntime(
-            'prod',
             true,
             $this->manifestFile,
             []
@@ -47,8 +46,7 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
 
         $html = $extension->renderFonts('Ubuntu');
 
-        self::assertStringContainsString('/assets/fonts/ubuntu/ubuntu.css', $html);
-        self::assertStringContainsString('/assets/fonts/ubuntu/ubuntu-styles.css', $html);
+        self::assertStringContainsString('/assets/fonts/ubuntu.css', $html);
         self::assertStringNotContainsString('fonts.googleapis.com', $html);
     }
 
@@ -68,7 +66,6 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         file_put_contents($this->manifestFile, json_encode($manifest));
 
         $extension = new GoogleFontsRuntime(
-            'prod',
             false, // use_locked_fonts = false
             $this->manifestFile,
             []
@@ -80,7 +77,7 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         self::assertStringNotContainsString('/assets/fonts/', $html);
     }
 
-    public function testDevEnvironmentUsesCdnEvenWithLockedFonts(): void
+    public function testCanUseLockedFontsInAnyEnvironment(): void
     {
         // Create manifest file
         $manifest = [
@@ -95,17 +92,18 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         ];
         file_put_contents($this->manifestFile, json_encode($manifest));
 
+        // Environment doesn't matter - only use_locked_fonts config matters
         $extension = new GoogleFontsRuntime(
-            'dev', // dev environment
-            true,
+            true,  // use_locked_fonts enabled
             $this->manifestFile,
             []
         );
 
         $html = $extension->renderFonts('Ubuntu');
 
-        self::assertStringContainsString('fonts.googleapis.com', $html);
-        self::assertStringNotContainsString('/assets/fonts/', $html);
+        // Should use locked fonts when enabled, regardless of environment
+        self::assertStringContainsString('/assets/fonts/ubuntu.css', $html);
+        self::assertStringNotContainsString('fonts.googleapis.com', $html);
     }
 
     public function testNonExistentFontFallsBackToCdn(): void
@@ -119,7 +117,6 @@ final class GoogleFontsExtensionLockedFontsTest extends TestCase
         file_put_contents($this->manifestFile, json_encode($manifest));
 
         $extension = new GoogleFontsRuntime(
-            'prod',
             true,
             $this->manifestFile,
             []
