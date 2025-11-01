@@ -69,7 +69,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer config minimum-stability ${{ matrix.stability }}
+          if [ "${{ matrix.stability }}" = "dev" ]; then
+            composer config minimum-stability dev
+            composer config prefer-stable false
+            # Remove dev dependencies that don't support Symfony 8.0 yet
+            composer remove friendsofphp/php-cs-fixer phpstan/phpstan --dev --no-update
+          fi
           composer require \
             "symfony/config:${{ matrix.symfony }}" \
             "symfony/console:${{ matrix.symfony }}" \
@@ -81,7 +86,7 @@ jobs:
             "symfony/routing:${{ matrix.symfony }}" \
             "symfony/twig-bundle:${{ matrix.symfony }}" \
             --no-interaction --no-update
-          composer update --prefer-dist --no-interaction --no-progress
+          composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --testdox
