@@ -107,11 +107,12 @@ final class FontLockManager
     /**
      * Lock fonts (download and generate manifest).
      *
-     * @param array<string, array{weights: array<int|string>, styles: array<string>}> $fonts
+     * @param array<string, array{weights: array<int|string>, styles: array<string>, monospace?: bool}> $fonts
+     * @param callable(int, int, string): void|null                                                     $progressCallback
      *
      * @return array<string, mixed>
      */
-    public function lockFonts(array $fonts): array
+    public function lockFonts(array $fonts, ?callable $progressCallback = null): array
     {
         $this->filesystem->mkdir(dirname($this->manifestFile), 0755);
 
@@ -121,34 +122,47 @@ final class FontLockManager
             'fonts' => [],
         ];
 
+        $totalFonts = count($fonts);
+        $currentFont = 0;
+
         foreach ($fonts as $fontName => $config) {
             if (!is_array($config)) {
                 continue;
             }
-            /** @var array{weights?: array<int|string>, styles?: array<string>} $config */
+
+            ++$currentFont;
+
+            // Call progress callback if provided
+            if (is_callable($progressCallback)) {
+                call_user_func($progressCallback, $currentFont, $totalFonts, $fontName);
+            }
+
+            /** @var array{weights?: array<int|string>, styles?: array<string>, monospace?: bool} $config */
             $weightsValue = $config['weights'] ?? [];
             /** @var array<int|string> $weightsValue */
             $weights = array_map('intval', $weightsValue);
             $stylesValue = $config['styles'] ?? [];
             /** @var array<string> $stylesValue */
             $styles = array_map('strval', $stylesValue);
+            $monospace = $config['monospace'] ?? false;
 
             try {
-                $result = $this->fontDownloader->downloadFont($fontName, $weights, $styles);
+                $result = $this->fontDownloader->downloadFont($fontName, $weights, $styles, 'swap', $monospace);
 
-                $fontDir = FontVariantHelper::sanitizeFontName($fontName);
-                $relativeCssPath = 'assets/fonts/' . $fontDir . '/' . $fontDir . '.css';
-                $relativeStylesheetPath = 'assets/fonts/' . $fontDir . '/' . $fontDir . '-styles.css';
+                $sanitizedName = FontVariantHelper::sanitizeFontName($fontName);
+                $relativeCssPath = 'assets/fonts/' . $sanitizedName . '.css';
+
+                // Use actually downloaded weights, not requested weights
+                $actualWeights = !empty($result['downloadedWeights']) ? $result['downloadedWeights'] : $weights;
 
                 $manifest['fonts'][$fontName] = [
-                    'weights' => $weights,
+                    'weights' => $actualWeights,
                     'styles' => $styles,
                     'files' => array_keys($result['files']),
                     'css' => $relativeCssPath,
-                    'stylesheet' => $relativeStylesheetPath,
+                    'monospace' => $monospace,
                 ];
             } catch (FontDownloadException $e) {
-                // Re-throw to let caller handle it
                 throw new FontDownloadException(sprintf('Failed to download font "%s": %s', $fontName, $e->getMessage()), 0, $e);
             }
         }

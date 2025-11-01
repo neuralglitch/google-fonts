@@ -148,7 +148,7 @@ final class FontLockManagerTest extends TestCase
         $apiClient = new MockHttpClient([
             new MockResponse($cssContent),
         ]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $fontsDir = $this->tempDir . '/fonts';
@@ -180,7 +180,7 @@ final class FontLockManagerTest extends TestCase
         $apiClient = new MockHttpClient([
             new MockResponse($cssContent),
         ]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $fontsDir = $this->tempDir . '/fonts';

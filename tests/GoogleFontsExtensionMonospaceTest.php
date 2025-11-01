@@ -11,7 +11,7 @@ final class GoogleFontsExtensionMonospaceTest extends TestCase
 {
     public function testRenderMonospaceFont(): void
     {
-        $extension = new GoogleFontsRuntime('dev', false, null, []);
+        $extension = new GoogleFontsRuntime(false, null, []);
 
         $html = $extension->renderFonts('JetBrains Mono', '400 500', 'normal', null, true);
 
@@ -24,7 +24,7 @@ final class GoogleFontsExtensionMonospaceTest extends TestCase
 
     public function testMonospaceFontWithMultipleWeights(): void
     {
-        $extension = new GoogleFontsRuntime('dev', false, null, []);
+        $extension = new GoogleFontsRuntime(false, null, []);
 
         $html = $extension->renderFonts('Fira Code', '300 400 500 700', 'normal', null, true);
 
@@ -35,7 +35,7 @@ final class GoogleFontsExtensionMonospaceTest extends TestCase
 
     public function testNormalFontUsesCorrectFallback(): void
     {
-        $extension = new GoogleFontsRuntime('dev', false, null, []);
+        $extension = new GoogleFontsRuntime(false, null, []);
 
         $html = $extension->renderFonts('Ubuntu', '400', 'normal', null, false);
 
@@ -46,7 +46,7 @@ final class GoogleFontsExtensionMonospaceTest extends TestCase
 
     public function testMonospaceCssVariable(): void
     {
-        $extension = new GoogleFontsRuntime('dev', false, null, []);
+        $extension = new GoogleFontsRuntime(false, null, []);
 
         $html = $extension->renderFonts('Source Code Pro', '400', 'normal', null, true);
 

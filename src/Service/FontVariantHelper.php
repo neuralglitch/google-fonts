@@ -16,18 +16,22 @@ final class FontVariantHelper
      */
     public static function generateVariants(array $weights, array $styles): array
     {
-        $variants = [];
+        $hasItalic = in_array('italic', $styles, true);
+        $weightList = array_map(fn ($w) => (int) $w, $weights);
 
-        foreach ($styles as $style) {
-            foreach ($weights as $weight) {
-                if ('italic' === $style) {
-                    $variants[] = sprintf('ital,wght@1,%d', (int) $weight);
-                }
-                $variants[] = sprintf('wght@%d', (int) $weight);
+        if ($hasItalic) {
+            // Use ital,wght format: ital,wght@0,400;0,700;1,400;1,700
+            $variants = [];
+            foreach ($weightList as $weight) {
+                $variants[] = sprintf('0,%d', $weight); // Normal
+                $variants[] = sprintf('1,%d', $weight); // Italic
             }
+
+            return ['ital,wght@' . implode(';', $variants)];
         }
 
-        return array_unique($variants);
+        // Use simple wght format: wght@300;400;500;700
+        return ['wght@' . implode(';', $weightList)];
     }
 
     /**

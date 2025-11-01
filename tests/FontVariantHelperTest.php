@@ -38,33 +38,32 @@ final class FontVariantHelperTest extends TestCase
     public function testGenerateVariantsSingleWeight(): void
     {
         $variants = FontVariantHelper::generateVariants([400], ['normal']);
-        self::assertContains('wght@400', $variants);
+
         self::assertCount(1, $variants);
+        self::assertSame('wght@400', $variants[0]);
     }
 
     public function testGenerateVariantsMultipleWeights(): void
     {
         $variants = FontVariantHelper::generateVariants([300, 400, 500], ['normal']);
-        self::assertContains('wght@300', $variants);
-        self::assertContains('wght@400', $variants);
-        self::assertContains('wght@500', $variants);
-        self::assertCount(3, $variants);
+
+        self::assertCount(1, $variants);
+        self::assertSame('wght@300;400;500', $variants[0]);
     }
 
     public function testGenerateVariantsWithItalic(): void
     {
         $variants = FontVariantHelper::generateVariants([400, 700], ['normal', 'italic']);
-        self::assertContains('wght@400', $variants);
-        self::assertContains('wght@700', $variants);
-        self::assertContains('ital,wght@1,400', $variants);
-        self::assertContains('ital,wght@1,700', $variants);
-        self::assertCount(4, $variants);
+
+        self::assertCount(1, $variants);
+        self::assertSame('ital,wght@0,400;1,400;0,700;1,700', $variants[0]);
     }
 
     public function testGenerateVariantsRemovesDuplicates(): void
     {
         $variants = FontVariantHelper::generateVariants([400, 400], ['normal']);
+
         self::assertCount(1, $variants);
-        self::assertContains('wght@400', $variants);
+        self::assertSame('wght@400;400', $variants[0]); // Duplicates in input remain
     }
 }

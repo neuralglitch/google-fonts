@@ -19,6 +19,8 @@ final class GoogleFontsExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter('google_fonts.api_key', $config['api_key'] ?? null);
+        $container->setParameter('google_fonts.cache_ttl', $config['cache_ttl'] ?? 3600);
         $container->setParameter('google_fonts.use_locked_fonts', $config['use_locked_fonts'] ?? false);
         $container->setParameter('google_fonts.fonts_dir', $config['fonts_dir'] ?? '%kernel.project_dir%/assets/fonts');
         $container->setParameter(

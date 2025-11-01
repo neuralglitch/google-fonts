@@ -38,7 +38,7 @@ final class FontsLockCommandTest extends TestCase
         $fontDownloader = new FontDownloader(
             $this->tempDir,
             new MockHttpClient(),
-            new GoogleFontsApi(new MockHttpClient()),
+            new GoogleFontsApi(new MockHttpClient(), 'test-api-key'),
             $filesystem
         );
         $lockManager = new FontLockManager(
@@ -76,7 +76,7 @@ final class FontsLockCommandTest extends TestCase
         $cssContent = '@font-face { font-family: Ubuntu; }';
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
         $filesystem = new Filesystem();
 
         $fontsDir = $this->tempDir . '/fonts';
@@ -110,7 +110,7 @@ final class FontsLockCommandTest extends TestCase
         $fontDownloader = new FontDownloader(
             $fontsDir,
             new MockHttpClient(),
-            new GoogleFontsApi(new MockHttpClient()),
+            new GoogleFontsApi(new MockHttpClient(), 'test-api-key'),
             $filesystem
         );
         $lockManager = new FontLockManager($fontsDir, $manifestFile, $fontDownloader, $filesystem);
@@ -136,7 +136,7 @@ final class FontsLockCommandTest extends TestCase
         $fontDownloader = new FontDownloader(
             $fontsDir,
             new MockHttpClient(),
-            new GoogleFontsApi(new MockHttpClient()),
+            new GoogleFontsApi(new MockHttpClient(), 'test-api-key'),
             $filesystem
         );
         $lockManager = new FontLockManager($fontsDir, $manifestFile, $fontDownloader, $filesystem);

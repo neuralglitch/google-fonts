@@ -11,6 +11,12 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 final class GoogleFontsApiTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // Clear cache before each test
+        GoogleFontsApi::clearCache();
+    }
+
     public function testSearchFontsReturnsResults(): void
     {
         $jsonData = json_encode([
@@ -22,7 +28,7 @@ final class GoogleFontsApiTest extends TestCase
         $mockResponse = new MockResponse(false !== $jsonData ? $jsonData : '{}');
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $results = $api->searchFonts('Roboto', 10);
 
@@ -46,7 +52,7 @@ final class GoogleFontsApiTest extends TestCase
         );
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $results = $api->searchFonts('', 10);
 
@@ -62,7 +68,7 @@ final class GoogleFontsApiTest extends TestCase
 
         $mockResponse = new MockResponse((string) json_encode(['items' => $items]));
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $results = $api->searchFonts('Font', 5);
 
@@ -81,7 +87,7 @@ final class GoogleFontsApiTest extends TestCase
         );
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $metadata = $api->getFontMetadata('Ubuntu');
 
@@ -101,7 +107,7 @@ final class GoogleFontsApiTest extends TestCase
         );
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $metadata = $api->getFontMetadata('NonExistent');
 
@@ -119,7 +125,7 @@ final class GoogleFontsApiTest extends TestCase
         );
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $variants = $api->getFontVariants('Roboto');
 
@@ -144,7 +150,7 @@ final class GoogleFontsApiTest extends TestCase
         );
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $variants = $api->getFontVariants('Roboto');
 
@@ -156,7 +162,7 @@ final class GoogleFontsApiTest extends TestCase
     {
         $mockResponse = new MockResponse((string) json_encode(['items' => []]));
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $variants = $api->getFontVariants('NonExistent');
 
@@ -171,14 +177,13 @@ final class GoogleFontsApiTest extends TestCase
 
         $httpClient = new MockHttpClient(function ($method, $url) use ($mockResponse) {
             self::assertStringContainsString('family=Ubuntu', $url);
-            self::assertStringContainsString('wght@400', $url);
-            self::assertStringContainsString('wght@700', $url);
+            self::assertStringContainsString('wght@400;700', $url);
             self::assertStringContainsString('display=swap', $url);
 
             return $mockResponse;
         });
 
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
         $css = $api->downloadFontCss('Ubuntu', [400, 700], ['normal'], 'swap');
 
         self::assertStringContainsString('@font-face', $css);
@@ -189,12 +194,12 @@ final class GoogleFontsApiTest extends TestCase
     {
         $mockResponse = new MockResponse('@font-face { font-family: Ubuntu; }');
         $httpClient = new MockHttpClient(function ($method, $url) use ($mockResponse) {
-            self::assertStringContainsString('ital,wght@1,400', $url);
+            self::assertStringContainsString('ital,wght@0,400;1,400', $url);
 
             return $mockResponse;
         });
 
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
         $css = $api->downloadFontCss('Ubuntu', [400], ['normal', 'italic']);
 
         self::assertIsString($css);
@@ -212,7 +217,7 @@ final class GoogleFontsApiTest extends TestCase
         );
 
         $httpClient = new MockHttpClient($mockResponse);
-        $api = new GoogleFontsApi($httpClient);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
 
         $results = $api->searchFonts('OPEN', 20);
 
@@ -220,5 +225,243 @@ final class GoogleFontsApiTest extends TestCase
         $firstResult = reset($results);
         self::assertTrue(is_array($firstResult));
         self::assertSame('Open Sans', $firstResult['family']);
+    }
+
+    public function testSearchFontsThrowsExceptionWhenApiKeyMissing(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Google Fonts API key is required');
+
+        $httpClient = new MockHttpClient();
+        $api = new GoogleFontsApi($httpClient, null);
+
+        $api->searchFonts('Roboto');
+    }
+
+    public function testGetFontMetadataThrowsExceptionWhenApiKeyMissing(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Google Fonts API key is required');
+
+        $httpClient = new MockHttpClient();
+        $api = new GoogleFontsApi($httpClient, null);
+
+        $api->getFontMetadata('Roboto');
+    }
+
+    public function testSearchFontsHandlesEmptyItems(): void
+    {
+        $mockResponse = new MockResponse((string) json_encode(['items' => []]));
+        $httpClient = new MockHttpClient($mockResponse);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+
+        $results = $api->searchFonts('NonExistent');
+
+        self::assertIsArray($results);
+        self::assertEmpty($results);
+    }
+
+    public function testSearchFontsHandlesMissingItems(): void
+    {
+        $mockResponse = new MockResponse((string) json_encode([]));
+        $httpClient = new MockHttpClient($mockResponse);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+
+        $results = $api->searchFonts('Roboto');
+
+        self::assertIsArray($results);
+        self::assertEmpty($results);
+    }
+
+    public function testGetFontVariantsHandlesItalicOnlyVariant(): void
+    {
+        $mockResponse = new MockResponse(
+            (string) json_encode([
+                'items' => [
+                    ['family' => 'Roboto', 'variants' => ['italic']],
+                ],
+            ])
+        );
+
+        $httpClient = new MockHttpClient($mockResponse);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+
+        $variants = $api->getFontVariants('Roboto');
+
+        self::assertContains(400, $variants['weights']);
+        self::assertContains('italic', $variants['styles']);
+    }
+
+    public function testGetFontVariantsHandlesNonStringVariants(): void
+    {
+        $mockResponse = new MockResponse(
+            (string) json_encode([
+                'items' => [
+                    ['family' => 'Roboto', 'variants' => ['regular', 123, null, '700']],
+                ],
+            ])
+        );
+
+        $httpClient = new MockHttpClient($mockResponse);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+
+        $variants = $api->getFontVariants('Roboto');
+
+        self::assertContains(400, $variants['weights']);
+        self::assertContains(700, $variants['weights']);
+    }
+
+    public function testGetFontVariantsHandlesMissingVariants(): void
+    {
+        $mockResponse = new MockResponse(
+            (string) json_encode([
+                'items' => [
+                    ['family' => 'Roboto'],
+                ],
+            ])
+        );
+
+        $httpClient = new MockHttpClient($mockResponse);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+
+        $variants = $api->getFontVariants('Roboto');
+
+        self::assertSame(['weights' => [], 'styles' => ['normal']], $variants);
+    }
+
+    public function testGetFontVariantsHandlesNonArrayVariants(): void
+    {
+        $mockResponse = new MockResponse(
+            (string) json_encode([
+                'items' => [
+                    ['family' => 'Roboto', 'variants' => 'invalid'],
+                ],
+            ])
+        );
+
+        $httpClient = new MockHttpClient($mockResponse);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+
+        $variants = $api->getFontVariants('Roboto');
+
+        self::assertSame(['weights' => [], 'styles' => ['normal']], $variants);
+    }
+
+    public function testDownloadFontCssHandlesFontNameWithSpaces(): void
+    {
+        $mockResponse = new MockResponse('@font-face { font-family: "Open Sans"; }');
+        $httpClient = new MockHttpClient(function ($method, $url) use ($mockResponse) {
+            // Font name should have spaces replaced with +
+            self::assertStringContainsString('family=Open+Sans', $url);
+
+            return $mockResponse;
+        });
+
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+        $css = $api->downloadFontCss('Open Sans', [400], ['normal']);
+
+        self::assertStringContainsString('@font-face', $css);
+    }
+
+    public function testDownloadFontCssHandlesCustomDisplay(): void
+    {
+        $mockResponse = new MockResponse('@font-face { }');
+        $httpClient = new MockHttpClient(function ($method, $url) use ($mockResponse) {
+            self::assertStringContainsString('display=fallback', $url);
+
+            return $mockResponse;
+        });
+
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+        $css = $api->downloadFontCss('Roboto', [400], ['normal'], 'fallback');
+
+        self::assertIsString($css);
+    }
+
+    public function testDownloadFontCssIncludesUserAgent(): void
+    {
+        $optionsCaptured = [];
+        $mockResponse = new MockResponse('@font-face { }');
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use ($mockResponse, &$optionsCaptured) {
+            $optionsCaptured = $options;
+
+            return $mockResponse;
+        });
+
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+        $api->downloadFontCss('Roboto', [400], ['normal']);
+
+        // Verify headers are set
+        self::assertArrayHasKey('headers', $optionsCaptured);
+        self::assertIsArray($optionsCaptured['headers']);
+
+        // Check User-Agent is in headers array (either as key or value)
+        $headersFound = false;
+        foreach ($optionsCaptured['headers'] as $key => $value) {
+            if ('User-Agent' === $key || (is_string($value) && str_contains($value, 'User-Agent'))) {
+                $headersFound = true;
+
+                break;
+            }
+        }
+
+        self::assertTrue($headersFound, 'User-Agent header configuration not found');
+    }
+
+    public function testDownloadFontCssHandlesMultipleWeights(): void
+    {
+        $mockResponse = new MockResponse('@font-face { }');
+        $httpClient = new MockHttpClient(function ($method, $url) use ($mockResponse) {
+            self::assertStringContainsString('wght@300;400;700', $url);
+
+            return $mockResponse;
+        });
+
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+        $css = $api->downloadFontCss('Roboto', [300, 400, 700], ['normal']);
+
+        self::assertIsString($css);
+    }
+
+    public function testGetFontVariantsRemovesDuplicateWeights(): void
+    {
+        $mockResponse = new MockResponse(
+            (string) json_encode([
+                'items' => [
+                    ['family' => 'Roboto', 'variants' => ['regular', '400', '700', '700italic']],
+                ],
+            ])
+        );
+
+        $httpClient = new MockHttpClient($mockResponse);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+
+        $variants = $api->getFontVariants('Roboto');
+
+        // Should not have duplicate weight 400
+        $weightCounts = array_count_values($variants['weights']);
+        foreach ($weightCounts as $count) {
+            self::assertSame(1, $count);
+        }
+    }
+
+    public function testGetFontVariantsRemovesDuplicateStyles(): void
+    {
+        $mockResponse = new MockResponse(
+            (string) json_encode([
+                'items' => [
+                    ['family' => 'Roboto', 'variants' => ['italic', '300italic', '700italic']],
+                ],
+            ])
+        );
+
+        $httpClient = new MockHttpClient($mockResponse);
+        $api = new GoogleFontsApi($httpClient, 'test-api-key');
+
+        $variants = $api->getFontVariants('Roboto');
+
+        // Should not have duplicate 'italic' style
+        $styleCounts = array_count_values($variants['styles']);
+        self::assertSame(1, $styleCounts['italic']);
     }
 }

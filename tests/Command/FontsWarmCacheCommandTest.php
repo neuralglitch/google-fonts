@@ -37,7 +37,7 @@ final class FontsWarmCacheCommandTest extends TestCase
         $fontDownloader = new FontDownloader(
             $this->tempDir,
             new MockHttpClient(),
-            new GoogleFontsApi(new MockHttpClient()),
+            new GoogleFontsApi(new MockHttpClient(), 'test-api-key'),
             $filesystem
         );
 
@@ -67,7 +67,7 @@ final class FontsWarmCacheCommandTest extends TestCase
         $cssContent = '@font-face { font-family: Ubuntu; }';
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
         $filesystem = new Filesystem();
 
         $fontDownloader = new FontDownloader($this->tempDir . '/fonts', $httpClient, $api, $filesystem);
@@ -90,7 +90,7 @@ final class FontsWarmCacheCommandTest extends TestCase
         $fontDownloader = new FontDownloader(
             $this->tempDir . '/fonts',
             new MockHttpClient(),
-            new GoogleFontsApi(new MockHttpClient()),
+            new GoogleFontsApi(new MockHttpClient(), 'test-api-key'),
             $filesystem
         );
 
@@ -113,7 +113,7 @@ final class FontsWarmCacheCommandTest extends TestCase
         $fontDownloader = new FontDownloader(
             $this->tempDir . '/fonts',
             new MockHttpClient(),
-            new GoogleFontsApi(new MockHttpClient()),
+            new GoogleFontsApi(new MockHttpClient(), 'test-api-key'),
             $filesystem
         );
 
@@ -141,7 +141,7 @@ final class FontsWarmCacheCommandTest extends TestCase
         $cssContent = '@font-face { font-family: Roboto; }';
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
         $filesystem = new Filesystem();
 
         $fontDownloader = new FontDownloader($this->tempDir . '/fonts', $httpClient, $api, $filesystem);

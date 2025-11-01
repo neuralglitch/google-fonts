@@ -36,6 +36,7 @@ final class FontsLockCommand extends Command
                 []
             )
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force re-download even if fonts already exist')
+            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Show what would be downloaded without actually downloading')
             ->setHelp($this->getHelpText());
     }
 
@@ -110,10 +111,30 @@ final class FontsLockCommand extends Command
         }
         $io->listing($fontList);
 
+        $dryRun = $input->getOption('dry-run');
+
+        if ($dryRun) {
+            $io->note('Dry-run mode: no fonts will be downloaded');
+            $io->info(sprintf('Would download %d font(s)', count($fonts)));
+
+            return Command::SUCCESS;
+        }
+
         $io->section('Downloading fonts');
 
+        // Create progress bar
+        $progressBar = $io->createProgressBar(count($fonts));
+        $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% - %message%');
+        $progressBar->setMessage('Starting...');
+
         try {
-            $manifest = $this->lockManager->lockFonts($fonts);
+            $manifest = $this->lockManager->lockFonts($fonts, function ($current, $total, $fontName) use ($progressBar) {
+                $progressBar->setMessage(sprintf('Downloading %s', $fontName));
+                $progressBar->advance();
+            });
+
+            $progressBar->finish();
+            $io->newLine(2);
 
             if (!is_array($manifest) || !isset($manifest['fonts']) || !is_array($manifest['fonts'])) {
                 throw new \RuntimeException('Invalid manifest structure returned from lockFonts');
@@ -122,6 +143,54 @@ final class FontsLockCommand extends Command
             $io->success([
                 sprintf('Locked %d font(s) successfully!', count($manifest['fonts'])),
             ]);
+
+            // Show locked fonts with detailed information
+            $fontList = [];
+            $totalMissing = 0;
+
+            foreach ($manifest['fonts'] as $name => $config) {
+                if (!is_array($config)) {
+                    continue;
+                }
+
+                // Get requested weights from scan (what was in templates)
+                $requestedFontConfig = $fonts[$name] ?? [];
+                $requestedWeights = isset($requestedFontConfig['weights'])
+                    ? array_map('intval', $requestedFontConfig['weights'])
+                    : [];
+
+                // Get downloaded weights (what was actually available from Google)
+                $downloadedWeights = isset($config['weights'])
+                    ? array_map('intval', $config['weights'])
+                    : [];
+
+                // Check if all requested weights were downloaded
+                $missingWeights = array_diff($requestedWeights, $downloadedWeights);
+                $weightsDisplay = implode(', ', $downloadedWeights);
+
+                if (!empty($missingWeights)) {
+                    $weightsDisplay .= ' <fg=yellow>(missing: ' . implode(', ', $missingWeights) . ')</>';
+                    $totalMissing += count($missingWeights);
+                }
+
+                $fontList[] = [
+                    $name,
+                    $weightsDisplay,
+                    implode(', ', $config['styles'] ?? []),
+                    count($config['files'] ?? []),
+                ];
+            }
+
+            $io->table(['Font', 'Weights', 'Styles', 'Files'], $fontList);
+
+            // Show warning if any weights were missing
+            if ($totalMissing > 0) {
+                $io->warning(sprintf(
+                    '%d weight(s) were not available from Google Fonts and were skipped.',
+                    $totalMissing
+                ));
+                $io->note('The manifest only includes weights that were actually downloaded.');
+            }
 
             $io->note('Enable locked fonts in production by setting: google_fonts.use_locked_fonts: true');
 

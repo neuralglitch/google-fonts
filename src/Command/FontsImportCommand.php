@@ -44,6 +44,7 @@ final class FontsImportCommand extends Command
                 'normal'
             )
             ->addOption('display', 'd', InputOption::VALUE_REQUIRED, 'Font display value', 'swap')
+            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Validate font without actually downloading')
             ->setHelp($this->getHelpText());
     }
 
@@ -101,10 +102,60 @@ final class FontsImportCommand extends Command
         ]);
 
         try {
+            // Validate font exists before downloading
+            $io->writeln('<comment>Validating font...</comment>');
+            $metadata = $this->fontDownloader->getApi()->getFontMetadata($fontName);
+
+            if (!$metadata) {
+                $io->error(sprintf('Font "%s" not found in Google Fonts catalog', $fontName));
+                $io->note('Use "php bin/console gfonts:search" to find available fonts');
+
+                return Command::FAILURE;
+            }
+
+            $io->writeln('<info>Font validated successfully</info>');
+
+            $dryRun = $input->getOption('dry-run');
+
+            if ($dryRun) {
+                $io->note('Dry-run mode: font will not be downloaded');
+                $io->info(sprintf('Font "%s" is available', $fontName));
+                $io->listing([
+                    sprintf('Weights: %s', implode(', ', $weights)),
+                    sprintf('Styles: %s', implode(', ', $styles)),
+                ]);
+
+                return Command::SUCCESS;
+            }
+
             $result = $this->fontDownloader->downloadFont($fontName, $weights, $styles, $display);
 
-            $io->success([
-                sprintf('Font "%s" imported successfully!', $fontName),
+            $io->success(sprintf('Successfully imported font: %s', $fontName));
+
+            // Show requested vs downloaded weights
+            $requestedWeights = array_map('intval', $weights);
+            $downloadedWeights = $result['downloadedWeights'];
+            $missingWeights = array_diff($requestedWeights, $downloadedWeights);
+
+            $io->section('Weight Information');
+            $io->table(
+                ['Type', 'Weights'],
+                [
+                    ['Requested', implode(', ', $requestedWeights)],
+                    ['Downloaded', implode(', ', $downloadedWeights)],
+                ]
+            );
+
+            if (!empty($missingWeights)) {
+                $io->warning(sprintf(
+                    'Some weights were not available from Google Fonts: %s',
+                    implode(', ', $missingWeights)
+                ));
+                $io->note('Only the downloaded weights will be available in your application.');
+            }
+
+            $io->section('File Information');
+            $io->listing([
                 sprintf('Files saved: %d', count($result['files'])),
                 sprintf('CSS file: %s', $result['cssPath']),
             ]);

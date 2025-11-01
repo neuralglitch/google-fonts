@@ -56,10 +56,20 @@ final class FontsImportCommandTest extends TestCase
         $httpClient = new MockHttpClient([
             new MockResponse($cssContent),
         ]);
-        $apiClient = new MockHttpClient([
+
+        // Mock API responses for validation and download
+        $apiResponses = [
+            // First: getFontMetadata for validation
+            new MockResponse((string) json_encode([
+                'items' => [
+                    ['family' => 'Ubuntu', 'variants' => ['300', 'regular', '700']],
+                ],
+            ])),
+            // Second: downloadFontCss
             new MockResponse($cssContent),
-        ]);
-        $api = new GoogleFontsApi($apiClient);
+        ];
+        $apiClient = new MockHttpClient($apiResponses);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
         $filesystem = new Filesystem();
         $fontDownloader = new FontDownloader($tempDir, $httpClient, $api, $filesystem);
 
@@ -74,7 +84,7 @@ final class FontsImportCommandTest extends TestCase
 
         self::assertSame(0, $commandTester->getStatusCode());
         $output = $commandTester->getDisplay();
-        self::assertStringContainsString('imported successfully', $output);
+        self::assertStringContainsString('Successfully imported font', $output);
         self::assertStringContainsString('Ubuntu', $output);
 
         // Cleanup
@@ -92,10 +102,12 @@ final class FontsImportCommandTest extends TestCase
         $httpClient = new MockHttpClient([
             new MockResponse($cssContent),
         ]);
-        $apiClient = new MockHttpClient([
+        $apiResponses = [
+            new MockResponse((string) json_encode(['items' => [['family' => 'Roboto', 'variants' => ['regular', '700']]]])),
             new MockResponse($cssContent),
-        ]);
-        $api = new GoogleFontsApi($apiClient);
+        ];
+        $apiClient = new MockHttpClient($apiResponses);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
         $filesystem = new Filesystem();
         $fontDownloader = new FontDownloader($tempDir, $httpClient, $api, $filesystem);
 
@@ -117,21 +129,23 @@ final class FontsImportCommandTest extends TestCase
         $tempDir = sys_get_temp_dir() . '/test-' . uniqid();
         mkdir($tempDir, 0777, true);
 
-        $cssContent = '@font-face { font-family: Roboto; }';
+        $cssContent = '@font-face { font-family: Inter; }';
         $httpClient = new MockHttpClient([
             new MockResponse($cssContent),
         ]);
-        $apiClient = new MockHttpClient([
+        $apiResponses = [
+            new MockResponse((string) json_encode(['items' => [['family' => 'Inter', 'variants' => ['regular']]]])),
             new MockResponse($cssContent),
-        ]);
-        $api = new GoogleFontsApi($apiClient);
+        ];
+        $apiClient = new MockHttpClient($apiResponses);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
         $filesystem = new Filesystem();
         $fontDownloader = new FontDownloader($tempDir, $httpClient, $api, $filesystem);
 
         $command = new FontsImportCommand($fontDownloader);
         $commandTester = new CommandTester($command);
 
-        $commandTester->execute(['name' => 'Roboto']);
+        $commandTester->execute(['name' => 'Inter']);
 
         self::assertSame(0, $commandTester->getStatusCode());
 
@@ -143,14 +157,16 @@ final class FontsImportCommandTest extends TestCase
         $tempDir = sys_get_temp_dir() . '/test-' . uniqid();
         mkdir($tempDir, 0777, true);
 
-        $cssContent = '@font-face { font-family: Ubuntu; }';
+        $cssContent = '@font-face { font-family: Poppins; }';
         $httpClient = new MockHttpClient([
             new MockResponse($cssContent),
         ]);
-        $apiClient = new MockHttpClient([
+        $apiResponses = [
+            new MockResponse((string) json_encode(['items' => [['family' => 'Poppins', 'variants' => ['regular']]]])),
             new MockResponse($cssContent),
-        ]);
-        $api = new GoogleFontsApi($apiClient);
+        ];
+        $apiClient = new MockHttpClient($apiResponses);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
         $filesystem = new Filesystem();
         $fontDownloader = new FontDownloader($tempDir, $httpClient, $api, $filesystem);
 
@@ -158,7 +174,7 @@ final class FontsImportCommandTest extends TestCase
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([
-            'name' => 'Ubuntu',
+            'name' => 'Poppins',
             '--display' => 'optional',
         ]);
 
@@ -179,7 +195,7 @@ final class FontsImportCommandTest extends TestCase
         $apiClient = new MockHttpClient([
             new MockResponse('', ['http_code' => 500]),
         ]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
         $filesystem = new Filesystem();
         $fontDownloader = new FontDownloader($tempDir, $httpClient, $api, $filesystem);
 

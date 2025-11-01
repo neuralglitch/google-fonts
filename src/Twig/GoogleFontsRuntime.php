@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeuralGlitch\GoogleFonts\Twig;
 
 use NeuralGlitch\GoogleFonts\Service\FontVariantHelper;
+use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
 final class GoogleFontsRuntime implements RuntimeExtensionInterface
@@ -17,10 +18,10 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
      * @param array<string, mixed> $defaults
      */
     public function __construct(
-        private readonly string $environment,
         private readonly bool $useLockedFonts,
         private readonly ?string $manifestFile = null,
-        private readonly array $defaults = []
+        private readonly array $defaults = [],
+        private readonly ?AssetMapperInterface $assetMapper = null
     ) {
     }
 
@@ -40,7 +41,9 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
         array|string $weights = ['400'],
         array|string $styles = ['normal'],
         ?string $display = null,
-        bool $monospace = false
+        bool $monospace = false,
+        ?string $subsetText = null,
+        ?bool $usePreload = null
     ): string {
         // Normalize weights and styles
         $normalizedWeights = $this->normalizeArray($weights);
@@ -54,9 +57,13 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
         $preconnectValue = $this->defaults['preconnect'] ?? true;
         $preconnect = is_bool($preconnectValue) ? $preconnectValue : true;
 
-        // Check if we should use locked fonts
-        if ($this->useLockedFonts && 'prod' === $this->environment && $this->hasLockedFonts($name)) {
-            return $this->renderLockedFonts($name, $monospace);
+        // Normalize optional parameters with defaults
+        $effectivePreload = is_bool($usePreload) ? $usePreload : false;
+        $effectiveText = is_string($subsetText) ? $subsetText : null;
+
+        // Check if we should use locked fonts (controlled by config)
+        if ($this->useLockedFonts && $this->hasLockedFonts($name)) {
+            return $this->renderLockedFonts($name, $monospace, $effectivePreload);
         }
 
         return $this->renderGoogleFonts(
@@ -65,7 +72,9 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
             $normalizedStyles,
             $display,
             $preconnect,
-            $monospace
+            $monospace,
+            $effectiveText,
+            $effectivePreload
         );
     }
 
@@ -81,7 +90,9 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
         array $styles,
         string $display,
         bool $preconnect,
-        bool $monospace
+        bool $monospace,
+        ?string $text,
+        bool $preload
     ): string {
         $family = str_replace(' ', '+', $name);
         $variants = FontVariantHelper::generateVariants($weights, $styles);
@@ -93,6 +104,11 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
             $display
         );
 
+        // Add text subsetting if provided
+        if (null !== $text && '' !== $text) {
+            $url .= '&text=' . urlencode($text);
+        }
+
         $fontVar = '--font-family-' . FontVariantHelper::sanitizeFontName($name);
         $defaultWeight = !empty($weights) ? (int) reset($weights) : 400;
         $headingWeight = $this->findWeight($weights, 500, 700);
@@ -103,6 +119,15 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
             $parts[] = '<link rel="preconnect" href="https://fonts.googleapis.com">';
             $parts[] = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
         }
+
+        // Add preload hint if requested
+        if ($preload) {
+            $parts[] = sprintf(
+                '<link rel="preload" href="%s" as="style">',
+                htmlspecialchars($url, ENT_QUOTES, 'UTF-8')
+            );
+        }
+
         $parts[] = sprintf('<link href="%s" rel="stylesheet">', htmlspecialchars($url, ENT_QUOTES, 'UTF-8'));
 
         $fallbackFamily = $monospace ? 'monospace' : 'sans-serif';
@@ -149,20 +174,49 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
     /**
      * Render locked/local fonts (production).
      */
-    private function renderLockedFonts(string $name, bool $monospace): string
+    private function renderLockedFonts(string $name, bool $monospace, bool $preload): string
     {
-        $fontDir = FontVariantHelper::sanitizeFontName($name);
-        $suffix = $monospace ? '-mono' : '';
+        // Sanitize font name for file paths (converts to lowercase with hyphens)
+        $sanitizedName = FontVariantHelper::sanitizeFontName($name);
 
-        return sprintf(
-            '<link rel="stylesheet" href="/assets/fonts/%s/%s.css">' . "\n  " .
-            '<link rel="stylesheet" href="/assets/fonts/%s/%s%s-styles.css">',
-            $fontDir,
-            $fontDir,
-            $fontDir,
-            $fontDir,
-            $suffix
+        // Get asset path through AssetMapper for proper versioning
+        $cssPath = $this->getAssetPath("fonts/{$sanitizedName}.css");
+
+        $parts = [];
+
+        // Add preload hint if requested
+        if ($preload) {
+            $parts[] = sprintf(
+                '<link rel="preload" href="%s" as="style">',
+                htmlspecialchars($cssPath, ENT_QUOTES, 'UTF-8')
+            );
+        }
+
+        $parts[] = sprintf(
+            '<link rel="stylesheet" href="%s">',
+            htmlspecialchars($cssPath, ENT_QUOTES, 'UTF-8')
         );
+
+        return implode("\n  ", $parts);
+    }
+
+    /**
+     * Get asset path through AssetMapper (with versioning in prod).
+     */
+    private function getAssetPath(string $logicalPath): string
+    {
+        if (null === $this->assetMapper) {
+            // Fallback if AssetMapper not available
+            return '/assets/' . $logicalPath;
+        }
+
+        $asset = $this->assetMapper->getAsset($logicalPath);
+        if (null === $asset) {
+            // Asset not found, return logical path
+            return '/assets/' . $logicalPath;
+        }
+
+        return $asset->publicPath;
     }
 
     /**
@@ -220,17 +274,19 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
                 return false;
             }
 
-            // Build lookup cache: font name => bool
+            // Build lookup cache: font name => bool (case-insensitive)
             self::$manifestCache = [];
             if (isset($manifest['fonts']) && is_array($manifest['fonts'])) {
                 foreach (array_keys($manifest['fonts']) as $font) {
-                    self::$manifestCache[$font] = true;
+                    // Store in lowercase for case-insensitive lookup
+                    self::$manifestCache[strtolower($font)] = true;
                 }
             }
 
             self::$manifestMtime = $mtime;
         }
 
-        return isset(self::$manifestCache[$fontName]);
+        // Case-insensitive lookup
+        return isset(self::$manifestCache[strtolower($fontName)]);
     }
 }

@@ -43,7 +43,7 @@ final class FontDownloaderTest extends TestCase
 
         // Create a real GoogleFontsApi with mock client
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -54,11 +54,8 @@ final class FontDownloaderTest extends TestCase
         self::assertArrayHasKey('files', $result);
         self::assertArrayHasKey('css', $result);
         self::assertArrayHasKey('cssPath', $result);
-        self::assertArrayHasKey('stylesheetPath', $result);
-        self::assertArrayHasKey('stylesheetCss', $result);
 
         self::assertFileExists($result['cssPath']);
-        self::assertFileExists($result['stylesheetPath']);
     }
 
     public function testDownloadFontGeneratesStylesheet(): void
@@ -68,19 +65,19 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
 
         $result = $downloader->downloadFont('Ubuntu', [400, 700], ['normal']);
 
-        self::assertStringContainsString(':root', $result['stylesheetCss']);
-        self::assertStringContainsString('--font-family-ubuntu', $result['stylesheetCss']);
-        self::assertStringContainsString('body', $result['stylesheetCss']);
-        self::assertStringContainsString('font-weight: 400', $result['stylesheetCss']);
-        self::assertStringContainsString('h1, h2, h3, h4, h5, h6', $result['stylesheetCss']);
-        self::assertStringContainsString('font-weight: 700', $result['stylesheetCss']);
+        self::assertStringContainsString(':root', $result['css']);
+        self::assertStringContainsString('--font-family-ubuntu', $result['css']);
+        self::assertStringContainsString('body', $result['css']);
+        self::assertStringContainsString('font-weight: 400', $result['css']);
+        self::assertStringContainsString('h1, h2, h3, h4, h5, h6', $result['css']);
+        self::assertStringContainsString('font-weight: 700', $result['css']);
     }
 
     public function testDownloadFontSelectsCorrectHeadingWeight(): void
@@ -90,7 +87,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -98,7 +95,7 @@ final class FontDownloaderTest extends TestCase
         // Weights: 300, 400, 600 - should select 600 for headings (first > 500)
         $result = $downloader->downloadFont('Ubuntu', [300, 400, 600], ['normal']);
 
-        self::assertStringContainsString('font-weight: 600', $result['stylesheetCss']);
+        self::assertStringContainsString('font-weight: 600', $result['css']);
     }
 
     public function testDownloadFontWithMultipleStyles(): void
@@ -108,15 +105,15 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
 
         $result = $downloader->downloadFont('Open Sans', [400, 700], ['normal', 'italic']);
 
-        self::assertStringContainsString('--font-family-open-sans', $result['stylesheetCss']);
-        self::assertStringContainsString("'Open Sans', sans-serif", $result['stylesheetCss']);
+        self::assertStringContainsString('--font-family-open-sans', $result['css']);
+        self::assertStringContainsString("'Open Sans', sans-serif", $result['css']);
     }
 
     public function testDownloadFontThrowsExceptionOnApiFailure(): void
@@ -127,7 +124,7 @@ final class FontDownloaderTest extends TestCase
         $apiClient = new MockHttpClient([
             new MockResponse('', ['http_code' => 500, 'error' => 'Server Error']),
         ]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -151,7 +148,7 @@ final class FontDownloaderTest extends TestCase
 
         // API client that succeeds
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -169,7 +166,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -177,12 +174,12 @@ final class FontDownloaderTest extends TestCase
         $result = $downloader->downloadFont('JetBrains Mono', [400, 500], ['normal'], 'swap', true);
 
         // Check monospace fallback
-        self::assertStringContainsString("'JetBrains Mono', monospace", $result['stylesheetCss']);
+        self::assertStringContainsString("'JetBrains Mono', monospace", $result['css']);
         // Check code elements
-        self::assertStringContainsString('code, pre, kbd, samp, var, tt', $result['stylesheetCss']);
+        self::assertStringContainsString('code, pre, kbd, samp, var, tt', $result['css']);
         // Should NOT contain body/heading rules
-        self::assertStringNotContainsString('body {', $result['stylesheetCss']);
-        self::assertStringNotContainsString('h1, h2, h3', $result['stylesheetCss']);
+        self::assertStringNotContainsString('body {', $result['css']);
+        self::assertStringNotContainsString('h1, h2, h3', $result['css']);
     }
 
     public function testDownloadFontWithEmptyWeights(): void
@@ -192,7 +189,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -200,7 +197,7 @@ final class FontDownloaderTest extends TestCase
         $result = $downloader->downloadFont('Ubuntu', [], ['normal']);
 
         // Should default to 400
-        self::assertStringContainsString('font-weight: 400', $result['stylesheetCss']);
+        self::assertStringContainsString('font-weight: 400', $result['css']);
     }
 
     public function testDownloadFontWithNameContainingSpaces(): void
@@ -210,7 +207,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -218,9 +215,9 @@ final class FontDownloaderTest extends TestCase
         $result = $downloader->downloadFont('Open Sans', [400], ['normal']);
 
         // Should sanitize font name in CSS variable
-        self::assertStringContainsString('--font-family-open-sans', $result['stylesheetCss']);
+        self::assertStringContainsString('--font-family-open-sans', $result['css']);
         // Original name should be preserved in font-family value
-        self::assertStringContainsString("'Open Sans'", $result['stylesheetCss']);
+        self::assertStringContainsString("'Open Sans'", $result['css']);
     }
 
     public function testDownloadFontWithCustomDisplay(): void
@@ -230,7 +227,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -249,7 +246,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -257,8 +254,8 @@ final class FontDownloaderTest extends TestCase
         // Weights: 300, 400, 800 - should select 800 for bold (first >= 700)
         $result = $downloader->downloadFont('Ubuntu', [300, 400, 800], ['normal']);
 
-        self::assertStringContainsString('strong, b {', $result['stylesheetCss']);
-        self::assertStringContainsString('font-weight: 800', $result['stylesheetCss']);
+        self::assertStringContainsString('strong, b {', $result['css']);
+        self::assertStringContainsString('font-weight: 800', $result['css']);
     }
 
     public function testDownloadFontDefaultsHeadingWeightWhenNoWeightAbove500(): void
@@ -268,7 +265,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -277,7 +274,7 @@ final class FontDownloaderTest extends TestCase
         $result = $downloader->downloadFont('Ubuntu', [300, 400], ['normal']);
 
         // Check heading has default 700
-        $lines = explode("\n", $result['stylesheetCss']);
+        $lines = explode("\n", $result['css']);
         $inHeadingBlock = false;
         foreach ($lines as $line) {
             if (str_contains($line, 'h1, h2, h3')) {
@@ -298,7 +295,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient([new MockResponse($cssContent)]);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -307,7 +304,7 @@ final class FontDownloaderTest extends TestCase
         $result = $downloader->downloadFont('Ubuntu', [300, 400, 500, 600], ['normal']);
 
         // Check bold has default 700
-        $lines = explode("\n", $result['stylesheetCss']);
+        $lines = explode("\n", $result['css']);
         $inBoldBlock = false;
         foreach ($lines as $line) {
             if (str_contains($line, 'strong, b')) {
@@ -336,7 +333,7 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient($responses);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
@@ -345,8 +342,10 @@ final class FontDownloaderTest extends TestCase
 
         // Should have 2 font files
         self::assertCount(2, $result['files']);
-        self::assertStringContainsString('./font1.woff2', $result['css']);
-        self::assertStringContainsString('./font2.woff2', $result['css']);
+        self::assertStringContainsString('url("./ubuntu-400', $result['css']);
+        self::assertStringContainsString('url("./ubuntu-400-1', $result['css']);
+        // Both files will use weight 400 (only one weight in array)
+        self::assertCount(2, $result['files']);
     }
 
     public function testDownloadFontGeneratesFilenameForUrlWithoutExtension(): void
@@ -363,19 +362,18 @@ final class FontDownloaderTest extends TestCase
         $httpClient = new MockHttpClient($responses);
 
         $apiClient = new MockHttpClient([new MockResponse($cssContent)]);
-        $api = new GoogleFontsApi($apiClient);
+        $api = new GoogleFontsApi($apiClient, 'test-api-key');
 
         $filesystem = new Filesystem();
         $downloader = new FontDownloader($this->tempDir, $httpClient, $api, $filesystem);
 
         $result = $downloader->downloadFont('Ubuntu', [400], ['normal']);
 
-        // Should generate filename with MD5 hash
+        // Should generate filename with weight
         self::assertCount(1, $result['files']);
         $filename = array_key_first($result['files']);
         self::assertNotNull($filename);
-        self::assertStringContainsString('ubuntu-', $filename);
-        self::assertStringEndsWith('.woff2', $filename);
+        self::assertSame('ubuntu-400.woff2', $filename);
     }
 
     private function removeDirectory(string $dir): void
