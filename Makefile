@@ -17,6 +17,9 @@ shell: ## Open shell in Docker container
 install: ## Install composer dependencies in Docker
 	docker compose run --rm php composer install 2>&1
 
+update: ## Update composer dependencies in Docker
+	docker compose run --rm php composer update 2>&1
+
 test: ## Run tests in Docker
 	docker compose run --rm php composer test 2>&1
 
