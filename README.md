@@ -27,6 +27,11 @@
 - **CLI Tools** - Search, import, lock, and warm-cache commands
 - **High Performance** - Optimized with full template caching support
 
+## Prerequisites
+
+For fully automatic setup, visit the [related Flex recipe repository](https://github.com/neuralglitch/symfony-recipes) and follow the instructions to add it to the 
+composer.json in the consuming project, as the recipe is not yet part of the Symfony’s main recipe repository.
+
 ## Installation
 
 ```bash
