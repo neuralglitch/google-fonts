@@ -1,0 +1,33 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": [
+            "src"
+        ],
+        "excludes": [
+            "Exception"
+        ]
+    },
+    "logs": {
+        "text": "build/infection.log",
+        "html": "build/infection.html"
+    },
+    "mutators": {
+        "@default": true,
+        "@function_signature": false,
+        "MethodCallRemoval": {
+            "ignore": [
+                "NeuralGlitch\\FontManager\\Provider\\*::configure"
+            ]
+        }
+    },
+    "minMsi": 40,
+    "minCoveredMsi": 45,
+    "testFramework": "phpunit",
+    "bootstrap": "vendor/autoload.php",
+    "phpUnit": {
+        "configDir": "."
+    }
+}
+
+
