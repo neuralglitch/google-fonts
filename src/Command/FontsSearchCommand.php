@@ -66,7 +66,7 @@ final class FontsSearchCommand extends Command
         try {
             $fonts = $this->api->searchFonts($query, $maxResults);
 
-            if (!is_array($fonts) || empty($fonts)) {
+            if (empty($fonts)) {
                 $io->warning('No fonts found.');
 
                 return Command::SUCCESS;

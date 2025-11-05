@@ -66,12 +66,6 @@ final class FontsPruneCommand extends Command
         $io->section('Scanning templates');
         $usedFonts = $this->lockManager->scanTemplates($templateDirs);
 
-        if (!is_array($usedFonts)) {
-            $io->error('Failed to scan templates');
-
-            return Command::FAILURE;
-        }
-
         // Load current manifest
         if (!file_exists($this->manifestFile)) {
             $io->warning('No manifest file found. Nothing to prune.');

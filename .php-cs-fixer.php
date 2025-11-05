@@ -26,6 +26,7 @@ return (new PhpCsFixer\Config())
         'phpdoc_single_line_var_spacing' => true,
         'phpdoc_var_without_name' => true,
         'phpdoc_align' => false, // Disable PHPDoc alignment
+        'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress', 'phpstan-ignore-next-line', 'phpstan-ignore-line']], // Keep DocBlocks with static analysis annotations
         'class_attributes_separation' => [
             'elements' => [
                 'method' => 'one',

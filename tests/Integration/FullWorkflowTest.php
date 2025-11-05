@@ -38,7 +38,9 @@ final class FullWorkflowTest extends TestCase
         $templatesDir = $this->tempDir . '/templates';
         $this->filesystem->mkdir($templatesDir);
 
-        file_put_contents($templatesDir . '/base.html.twig', <<<'TWIG'
+        file_put_contents(
+            $templatesDir . '/base.html.twig',
+            <<<'TWIG'
 <!DOCTYPE html>
 <html>
 <head>

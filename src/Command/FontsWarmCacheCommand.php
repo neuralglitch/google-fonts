@@ -55,10 +55,6 @@ final class FontsWarmCacheCommand extends Command
         $manifestOption = $input->getOption('manifest');
         $manifestPath = is_string($manifestOption) ? $manifestOption : $this->manifestFile;
 
-        if (!is_string($manifestPath)) {
-            throw new \InvalidArgumentException('Manifest path must be a string');
-        }
-
         if (!$this->filesystem->exists($manifestPath)) {
             $io->error(sprintf('Manifest file not found: %s', $manifestPath));
             $io->note('Run "gfonts:lock" first to create a manifest file.');
