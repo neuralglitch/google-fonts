@@ -12,4 +12,3 @@ services:
       - XDEBUG_ENABLED=${XDEBUG_ENABLED:-0}
     stdin_open: true
     tty: true
-
