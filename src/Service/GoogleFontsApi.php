@@ -40,7 +40,7 @@ final class GoogleFontsApi
      */
     public function searchFonts(string $query, int $maxResults = 20): array
     {
-        if (!$this->apiKey) {
+        if (null === $this->apiKey || '' === $this->apiKey) {
             throw new \RuntimeException('Google Fonts API key is required. Get your free API key at https://console.cloud.google.com/apis/credentials and configure it in config/packages/google_fonts.yaml under "api_key"');
         }
 
@@ -84,7 +84,7 @@ final class GoogleFontsApi
      */
     public function getFontMetadata(string $fontName): ?array
     {
-        if (!$this->apiKey) {
+        if (null === $this->apiKey || '' === $this->apiKey) {
             throw new \RuntimeException('Google Fonts API key is required. Get your free API key at https://console.cloud.google.com/apis/credentials and configure it in config/packages/google_fonts.yaml under "api_key"');
         }
 
@@ -116,7 +116,7 @@ final class GoogleFontsApi
     {
         $metadata = $this->getFontMetadata($fontName);
 
-        if (!$metadata || !is_array($metadata)) {
+        if (null === $metadata) {
             return ['weights' => [], 'styles' => []];
         }
 

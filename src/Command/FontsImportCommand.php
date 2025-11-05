@@ -106,7 +106,7 @@ final class FontsImportCommand extends Command
             $io->writeln('<comment>Validating font...</comment>');
             $metadata = $this->fontDownloader->getApi()->getFontMetadata($fontName);
 
-            if (!$metadata) {
+            if (null === $metadata) {
                 $io->error(sprintf('Font "%s" not found in Google Fonts catalog', $fontName));
                 $io->note('Use "php bin/console gfonts:search" to find available fonts');
 

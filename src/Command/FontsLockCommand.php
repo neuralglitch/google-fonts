@@ -85,7 +85,7 @@ final class FontsLockCommand extends Command
 
         $fonts = $this->lockManager->scanTemplates($templateDirs);
 
-        if (!is_array($fonts) || empty($fonts)) {
+        if (empty($fonts)) {
             $io->warning('No google_fonts() function calls found in templates.');
 
             return Command::SUCCESS;
@@ -94,9 +94,6 @@ final class FontsLockCommand extends Command
         $io->section('Found fonts');
         $fontList = [];
         foreach ($fonts as $name => $config) {
-            if (!is_array($config)) {
-                continue;
-            }
             /** @var array{weights?: array<int|string>, styles?: array<string>} $config */
             $weightsValue = $config['weights'] ?? null;
             $weights = is_array($weightsValue) ? $weightsValue : [];
@@ -136,7 +133,7 @@ final class FontsLockCommand extends Command
             $progressBar->finish();
             $io->newLine(2);
 
-            if (!is_array($manifest) || !isset($manifest['fonts']) || !is_array($manifest['fonts'])) {
+            if (!isset($manifest['fonts']) || !is_array($manifest['fonts'])) {
                 throw new \RuntimeException('Invalid manifest structure returned from lockFonts');
             }
 

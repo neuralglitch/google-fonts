@@ -81,7 +81,7 @@ final class FontLockManager
                     );
                 } else {
                     // Default weight
-                    if (empty($fonts[$fontName]['weights'])) {
+                    if ([] === $fonts[$fontName]['weights']) {
                         $fonts[$fontName]['weights'] = ['400'];
                     }
                 }
@@ -94,7 +94,7 @@ final class FontLockManager
                     );
                 } else {
                     // Default style
-                    if (empty($fonts[$fontName]['styles'])) {
+                    if ([] === $fonts[$fontName]['styles']) {
                         $fonts[$fontName]['styles'] = ['normal'];
                     }
                 }
@@ -126,10 +126,6 @@ final class FontLockManager
         $currentFont = 0;
 
         foreach ($fonts as $fontName => $config) {
-            if (!is_array($config)) {
-                continue;
-            }
-
             ++$currentFont;
 
             // Call progress callback if provided
@@ -153,7 +149,7 @@ final class FontLockManager
                 $relativeCssPath = 'assets/fonts/' . $sanitizedName . '.css';
 
                 // Use actually downloaded weights, not requested weights
-                $actualWeights = !empty($result['downloadedWeights']) ? $result['downloadedWeights'] : $weights;
+                $actualWeights = ([] !== $result['downloadedWeights']) ? $result['downloadedWeights'] : $weights;
 
                 $manifest['fonts'][$fontName] = [
                     'weights' => $actualWeights,

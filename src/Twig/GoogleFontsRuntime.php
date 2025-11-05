@@ -253,7 +253,7 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
      */
     private function hasLockedFonts(string $fontName): bool
     {
-        if (!$this->manifestFile || !file_exists($this->manifestFile)) {
+        if (null === $this->manifestFile || '' === $this->manifestFile || !file_exists($this->manifestFile)) {
             return false;
         }
 

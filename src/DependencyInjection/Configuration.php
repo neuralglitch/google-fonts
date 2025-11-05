@@ -16,43 +16,49 @@ final class Configuration implements ConfigurationInterface
         /** @var ArrayNodeDefinition $root */
         $root = $treeBuilder->getRootNode();
 
-        // @phpstan-ignore-next-line - Fluent interface methods are not fully recognized by PHPStan
-        $root
-            ->children()
+        $children = $root->children();
+
+        /**
+         * @psalm-suppress PossiblyNullReference
+         *
+         * @phpstan-ignore-next-line
+         */
+        $children
             ->scalarNode('api_key')
-            ->defaultNull()
-            ->info('Google Fonts API key (required for gfonts:search and gfonts:import commands)')
+                ->defaultNull()
+                ->info('Google Fonts API key (required for gfonts:search and gfonts:import commands)')
             ->end()
             ->integerNode('cache_ttl')
-            ->defaultValue(3600)
-            ->info('API response cache TTL in seconds (default: 3600 = 1 hour)')
+                ->defaultValue(3600)
+                ->info('API response cache TTL in seconds (default: 3600 = 1 hour)')
             ->end()
             ->booleanNode('use_locked_fonts')
-            ->defaultFalse()
-            ->info('Use locked/local fonts in production instead of Google Fonts CDN')
+                ->defaultFalse()
+                ->info('Use locked/local fonts in production instead of Google Fonts CDN')
             ->end()
-                ->scalarNode('fonts_dir')
+            ->scalarNode('fonts_dir')
                 ->defaultValue('%kernel.project_dir%/assets/fonts')
                 ->info('Directory where locked fonts are stored (served by AssetMapper)')
-                ->end()
+            ->end()
             ->scalarNode('manifest_file')
-            ->defaultValue('%kernel.project_dir%/assets/fonts.json')
-            ->info('Path to the fonts manifest file')
+                ->defaultValue('%kernel.project_dir%/assets/fonts.json')
+                ->info('Path to the fonts manifest file')
             ->end()
             ->arrayNode('defaults')
-            ->addDefaultsIfNotSet()
-            ->children()
-            ->scalarNode('display')
-            ->defaultValue('swap')
-            ->info('Default font-display value')
-            ->end()
-            ->booleanNode('preconnect')
-            ->defaultTrue()
-            ->info('Enable preconnect hints for Google Fonts')
-            ->end()
-            ->end()
-            ->end()
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->scalarNode('display')
+                        ->defaultValue('swap')
+                        ->info('Default font-display value')
+                    ->end()
+                    ->booleanNode('preconnect')
+                        ->defaultTrue()
+                        ->info('Enable preconnect hints for Google Fonts')
+                    ->end()
+                ->end()
             ->end();
+
+        $children->end();
 
         return $treeBuilder;
     }
