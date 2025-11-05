@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-11-05
+
+### Added
+
+- Font subsetting support via `text` parameter in `google_fonts()` for character subset optimization
+- Preload hints via `preload` parameter to generate `<link rel="preload">` for critical fonts
+- API response caching with configurable TTL (default 1 hour) for Google Fonts API calls
+- Font validation in commands before downloading from Google Fonts catalog
+- Dry-run mode for `gfonts:lock` and `gfonts:import` commands
+- Progress bars for long-running CLI commands
+- Comprehensive integration tests covering full workflow from template scanning to rendering
+- New console commands:
+  - `gfonts:status` - Display configuration and locked fonts status
+  - `gfonts:prune` - Remove unused fonts from locked fonts directory
+- Forward compatibility with Symfony 7.1+ `Filesystem::readFile()` method with fallback to `file_get_contents()`
+
+### Changed
+
+- Environment-agnostic configuration using YAML `when@prod` and `when@dev` instead of runtime environment checks
+- CSS optimization by merging `@font-face` declarations and intelligent styling rules into single CSS file per font
+- AssetMapper integration now uses relative font paths (`./font.woff2`) in CSS for proper compatibility
+- Manifest structure now records only actually downloaded weights, not requested weights
+- Enhanced CLI output showing requested vs downloaded weights with warnings for unavailable weights
+- Detailed tables with font information in command output
+- Improved test isolation with multi-manifest cache support to prevent test interference in random execution order
+
+### Fixed
+
+- AssetMapper 404 errors by fixing asset path generation (`fonts_dir` now properly in `assets/`)
+- Symfony Flex recipe implementation with proper manifest structure and GitHub Actions workflow for automatic endpoint generation
+- Static cache collision by keying manifest cache by file path to support multiple manifests in tests
+- PHP notices by proper error handling for `file_get_contents()` failures in edge cases
+- Test stability issues with random order execution by implementing proper cache isolation
+
+### Improved
+
+- Type safety by replacing truthy/falsy comparisons with strict null checks
+- Exception classes made `final` per best practices
+- PHPDoc annotations preserved in PHP CS Fixer configuration for static analysis tools
+- Test coverage increased to >93% with comprehensive edge case testing
+- Documentation consolidated and updated, redundancy removed
+- Code quality with all Psalm ERROR and INFO level issues resolved, PHPStan Level 9 compliance maintained
+
 ## [0.1.0] - 2025-11-01
 
 ### Added
