@@ -9,6 +9,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Filesystem;
 
 #[AsCommand(
     name: 'gfonts:status',
@@ -20,7 +21,8 @@ final class FontsStatusCommand extends Command
         private readonly string $environment,
         private readonly bool $useLockedFonts,
         private readonly string $manifestFile,
-        private readonly string $fontsDir
+        private readonly string $fontsDir,
+        private readonly Filesystem $filesystem
     ) {
         parent::__construct();
     }
@@ -58,11 +60,16 @@ final class FontsStatusCommand extends Command
         // Locked fonts
         $io->section('Locked Fonts');
         if (file_exists($this->manifestFile)) {
-            $content = file_get_contents($this->manifestFile);
-            if (false === $content) {
-                $io->error('Failed to read manifest file');
+            if (method_exists($this->filesystem, 'readFile')) {
+                /** @phpstan-ignore-next-line - readFile() available in Symfony 7.1+ */
+                $content = $this->filesystem->readFile($this->manifestFile);
+            } else {
+                $content = file_get_contents($this->manifestFile);
+                if (false === $content) {
+                    $io->error('Failed to read manifest file');
 
-                return Command::FAILURE;
+                    return Command::FAILURE;
+                }
             }
 
             $manifest = json_decode($content, true);

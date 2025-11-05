@@ -6,13 +6,13 @@ namespace NeuralGlitch\GoogleFonts\Twig;
 
 use NeuralGlitch\GoogleFonts\Service\FontVariantHelper;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Twig\Extension\RuntimeExtensionInterface;
 
 final class GoogleFontsRuntime implements RuntimeExtensionInterface
 {
-    /** @var array<string, bool>|null */
-    private static ?array $manifestCache = null;
-    private static ?int $manifestMtime = null;
+    /** @var array<string, array{cache: array<string, bool>, mtime: int}> */
+    private static array $manifestCaches = [];
 
     /**
      * @param array<string, mixed> $defaults
@@ -263,10 +263,26 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
             return false;
         }
 
-        if (null === self::$manifestCache || self::$manifestMtime !== $mtime) {
-            $content = file_get_contents($this->manifestFile);
-            if (false === $content) {
-                return false;
+        // Use manifest file path as cache key to support multiple manifest files in tests
+        $cacheKey = $this->manifestFile;
+
+        // Rebuild cache if file doesn't exist in cache or has been modified
+        if (!isset(self::$manifestCaches[$cacheKey]) || self::$manifestCaches[$cacheKey]['mtime'] !== $mtime) {
+            // Use Filesystem::readFile() if available (Symfony 7.1+), otherwise file_get_contents()
+            if (class_exists(Filesystem::class) && method_exists(Filesystem::class, 'readFile')) {
+                $filesystem = new Filesystem();
+
+                try {
+                    /** @phpstan-ignore-next-line - readFile() available in Symfony 7.1+ */
+                    $content = $filesystem->readFile($this->manifestFile);
+                } catch (\Throwable $e) {
+                    return false;
+                }
+            } else {
+                $content = @file_get_contents($this->manifestFile);
+                if (false === $content) {
+                    return false;
+                }
             }
 
             $manifest = json_decode($content, true);
@@ -275,18 +291,21 @@ final class GoogleFontsRuntime implements RuntimeExtensionInterface
             }
 
             // Build lookup cache: font name => bool (case-insensitive)
-            self::$manifestCache = [];
+            $cache = [];
             if (isset($manifest['fonts']) && is_array($manifest['fonts'])) {
                 foreach (array_keys($manifest['fonts']) as $font) {
                     // Store in lowercase for case-insensitive lookup
-                    self::$manifestCache[strtolower($font)] = true;
+                    $cache[strtolower($font)] = true;
                 }
             }
 
-            self::$manifestMtime = $mtime;
+            self::$manifestCaches[$cacheKey] = [
+                'cache' => $cache,
+                'mtime' => $mtime,
+            ];
         }
 
         // Case-insensitive lookup
-        return isset(self::$manifestCache[strtolower($fontName)]);
+        return isset(self::$manifestCaches[$cacheKey]['cache'][strtolower($fontName)]);
     }
 }

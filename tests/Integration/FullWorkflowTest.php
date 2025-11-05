@@ -34,7 +34,6 @@ final class FullWorkflowTest extends TestCase
 
     public function testCompleteWorkflowFromTemplateToProduction(): void
     {
-        // Step 1: Create template with google_fonts() calls
         $templatesDir = $this->tempDir . '/templates';
         $this->filesystem->mkdir($templatesDir);
 
@@ -52,7 +51,6 @@ final class FullWorkflowTest extends TestCase
 TWIG
         );
 
-        // Step 2: Scan templates
         $fontsDir = $this->tempDir . '/fonts';
         $manifestFile = $this->tempDir . '/fonts.json';
 
@@ -60,13 +58,9 @@ TWIG
         $mockFont = 'mock-font-content';
 
         $httpClient = new MockHttpClient([
-            // Roboto CSS download
             new MockResponse($mockCss),
-            // Roboto font file
             new MockResponse($mockFont),
-            // JetBrains Mono CSS download
             new MockResponse($mockCss),
-            // JetBrains Mono font file
             new MockResponse($mockFont),
         ]);
 
@@ -77,18 +71,14 @@ TWIG
 
         $scannedFonts = $lockManager->scanTemplates($templatesDir);
 
-        // Verify scanned fonts
         self::assertArrayHasKey('Roboto', $scannedFonts);
         self::assertArrayHasKey('JetBrains Mono', $scannedFonts);
 
-        // Just verify keys exist - monospace detection may vary
         self::assertArrayHasKey('weights', $scannedFonts['Roboto']);
         self::assertArrayHasKey('weights', $scannedFonts['JetBrains Mono']);
 
-        // Step 3: Lock fonts
         $manifest = $lockManager->lockFonts($scannedFonts);
 
-        // Verify manifest created
         self::assertFileExists($manifestFile);
         self::assertIsArray($manifest);
         self::assertArrayHasKey('fonts', $manifest);
@@ -97,10 +87,8 @@ TWIG
         self::assertArrayHasKey('Roboto', $manifestFonts);
         self::assertArrayHasKey('JetBrains Mono', $manifestFonts);
 
-        // Step 4: Verify font files created
         self::assertDirectoryExists($fontsDir);
 
-        // Step 5: Test runtime with locked fonts (without AssetMapper it falls back to CDN)
         $runtime = new GoogleFontsRuntime(
             false, // use CDN for this test (no AssetMapper in unit test)
             $manifestFile,
@@ -109,10 +97,8 @@ TWIG
 
         $html = $runtime->renderFonts('Roboto', [400, 700], ['normal']);
 
-        // Without AssetMapper, should use CDN
         self::assertStringContainsString('fonts.googleapis.com', $html);
 
-        // Step 6: Test runtime with CDN fallback
         $runtime2 = new GoogleFontsRuntime(
             false, // use CDN
             $manifestFile,
@@ -121,7 +107,6 @@ TWIG
 
         $html2 = $runtime2->renderFonts('Roboto', [400], ['normal']);
 
-        // Should use CDN
         self::assertStringContainsString('fonts.googleapis.com', $html2);
     }
 
@@ -146,10 +131,8 @@ TWIG
             []
         );
 
-        // Request non-existent font
         $html = $runtime->renderFonts('NonExistent', [400], ['normal']);
 
-        // Should fall back to CDN
         self::assertStringContainsString('fonts.googleapis.com', $html);
     }
 
@@ -176,13 +159,11 @@ TWIG
 
         $scannedFonts = $lockManager->scanTemplates($templatesDir);
 
-        // Verify scanned fonts
         self::assertArrayHasKey('Fira Code', $scannedFonts);
         self::assertArrayHasKey('weights', $scannedFonts['Fira Code']);
 
         $manifest = $lockManager->lockFonts($scannedFonts);
 
-        // Verify manifest
         self::assertIsArray($manifest['fonts']);
         self::assertArrayHasKey('Fira Code', $manifest['fonts']);
     }

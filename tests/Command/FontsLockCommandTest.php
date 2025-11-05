@@ -55,7 +55,6 @@ final class FontsLockCommandTest extends TestCase
         self::assertTrue($definition->hasArgument('template-dirs'));
         self::assertTrue($definition->hasOption('force'));
 
-        // Test help text is set
         $help = $command->getHelp();
         self::assertNotEmpty($help);
         self::assertStringContainsString('scans Twig templates', $help);

@@ -40,6 +40,7 @@ final class FontLockManager
         foreach ($finder as $file) {
             // Use Filesystem::readFile() if available (Symfony 7.1+), otherwise file_get_contents()
             if (method_exists($this->filesystem, 'readFile')) {
+                /** @phpstan-ignore-next-line - readFile() available in Symfony 7.1+ */
                 $content = $this->filesystem->readFile($file->getPathname());
             } else {
                 $content = file_get_contents($file->getPathname());

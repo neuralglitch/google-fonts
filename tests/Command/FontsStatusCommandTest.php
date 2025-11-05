@@ -8,6 +8,7 @@ use NeuralGlitch\GoogleFonts\Command\FontsStatusCommand;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Filesystem\Filesystem;
 
 final class FontsStatusCommandTest extends TestCase
 {
@@ -28,7 +29,7 @@ final class FontsStatusCommandTest extends TestCase
 
     public function testConfigure(): void
     {
-        $command = new FontsStatusCommand('dev', false, $this->tempDir . '/fonts.json', $this->tempDir);
+        $command = new FontsStatusCommand('dev', false, $this->tempDir . '/fonts.json', $this->tempDir, new Filesystem());
 
         self::assertSame('gfonts:status', $command->getName());
         self::assertSame('Show Google Fonts configuration and status', $command->getDescription());
@@ -44,7 +45,7 @@ final class FontsStatusCommandTest extends TestCase
         $fontsDir = $this->tempDir . '/fonts';
         mkdir($fontsDir, 0777, true);
 
-        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir);
+        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir, new Filesystem());
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([]);
@@ -87,7 +88,7 @@ final class FontsStatusCommandTest extends TestCase
         ];
         file_put_contents($manifestFile, json_encode($manifest));
 
-        $command = new FontsStatusCommand('prod', true, $manifestFile, $fontsDir);
+        $command = new FontsStatusCommand('prod', true, $manifestFile, $fontsDir, new Filesystem());
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([]);
@@ -109,7 +110,7 @@ final class FontsStatusCommandTest extends TestCase
         $manifestFile = $this->tempDir . '/fonts.json';
         $fontsDir = $this->tempDir . '/fonts';
 
-        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir);
+        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir, new Filesystem());
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([]);
@@ -130,7 +131,7 @@ final class FontsStatusCommandTest extends TestCase
         $manifest = ['locked' => true, 'fonts' => []];
         file_put_contents($manifestFile, json_encode($manifest));
 
-        $command = new FontsStatusCommand('prod', true, $manifestFile, $fontsDir);
+        $command = new FontsStatusCommand('prod', true, $manifestFile, $fontsDir, new Filesystem());
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([]);
@@ -147,7 +148,7 @@ final class FontsStatusCommandTest extends TestCase
         $manifestFile = $this->tempDir . '/fonts.json';
         $fontsDir = $this->tempDir . '/fonts';
 
-        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir);
+        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir, new Filesystem());
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([]);
@@ -167,7 +168,7 @@ final class FontsStatusCommandTest extends TestCase
 
         file_put_contents($manifestFile, 'invalid json{{{');
 
-        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir);
+        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir, new Filesystem());
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([]);
@@ -190,7 +191,7 @@ final class FontsStatusCommandTest extends TestCase
         ];
         file_put_contents($manifestFile, json_encode($manifest));
 
-        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir);
+        $command = new FontsStatusCommand('dev', false, $manifestFile, $fontsDir, new Filesystem());
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([]);
