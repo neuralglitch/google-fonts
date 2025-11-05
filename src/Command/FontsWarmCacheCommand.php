@@ -64,6 +64,7 @@ final class FontsWarmCacheCommand extends Command
 
         // Use Filesystem::readFile() if available (Symfony 7.1+), otherwise file_get_contents()
         if (method_exists($this->filesystem, 'readFile')) {
+            /** @phpstan-ignore-next-line - readFile() available in Symfony 7.1+ */
             $content = $this->filesystem->readFile($manifestPath);
         } else {
             $content = file_get_contents($manifestPath);

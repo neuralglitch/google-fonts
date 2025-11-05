@@ -14,6 +14,11 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 final class FontsSearchCommandTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        GoogleFontsApi::clearCache();
+    }
+
     public function testConfigureSetArgumentsAndOptions(): void
     {
         $api = new GoogleFontsApi(new MockHttpClient(), 'test-api-key');
@@ -24,7 +29,6 @@ final class FontsSearchCommandTest extends TestCase
         self::assertTrue($definition->hasArgument('query'));
         self::assertTrue($definition->hasOption('max-results'));
 
-        // Test help text is set
         $help = $command->getHelp();
         self::assertNotEmpty($help);
         self::assertStringContainsString('searches the Google Fonts catalog', $help);
@@ -114,7 +118,6 @@ final class FontsSearchCommandTest extends TestCase
 
     public function testExecuteHandlesApiException(): void
     {
-        // Clear cache to ensure API is called
         GoogleFontsApi::clearCache();
 
         $mockResponse = new MockResponse('', ['http_code' => 500]);

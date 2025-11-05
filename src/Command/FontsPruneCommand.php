@@ -73,11 +73,16 @@ final class FontsPruneCommand extends Command
             return Command::SUCCESS;
         }
 
-        $manifestContent = file_get_contents($this->manifestFile);
-        if (false === $manifestContent) {
-            $io->error('Failed to read manifest file');
+        if (method_exists($this->filesystem, 'readFile')) {
+            /** @phpstan-ignore-next-line - readFile() available in Symfony 7.1+ */
+            $manifestContent = $this->filesystem->readFile($this->manifestFile);
+        } else {
+            $manifestContent = file_get_contents($this->manifestFile);
+            if (false === $manifestContent) {
+                $io->error('Failed to read manifest file');
 
-            return Command::FAILURE;
+                return Command::FAILURE;
+            }
         }
 
         $manifest = json_decode($manifestContent, true);

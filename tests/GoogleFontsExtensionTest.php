@@ -120,7 +120,6 @@ final class GoogleFontsExtensionTest extends TestCase
     {
         $extension = new GoogleFontsRuntime(false, null, []);
 
-        // With weight >= 700, should use it for bold
         $html = $extension->renderFonts('Ubuntu', '300 400 800');
 
         self::assertStringContainsString('font-weight: 800', $html);
@@ -130,7 +129,6 @@ final class GoogleFontsExtensionTest extends TestCase
     {
         $extension = new GoogleFontsRuntime(false, null, []);
 
-        // With weight > 500, should use it for headings
         $html = $extension->renderFonts('Ubuntu', '300 400 600');
 
         self::assertStringContainsString('font-weight: 600', $html);
@@ -142,7 +140,6 @@ final class GoogleFontsExtensionTest extends TestCase
 
         $html = $extension->renderFonts('Roboto', '400', 'normal', null, false, 'Hello World');
 
-        // HTML entities are escaped in output
         self::assertStringContainsString('&amp;text=Hello+World', $html);
     }
 
@@ -152,7 +149,6 @@ final class GoogleFontsExtensionTest extends TestCase
 
         $html = $extension->renderFonts('Roboto', '400', 'normal', null, false, ''); // empty text
 
-        // Empty text should not add &text= parameter
         self::assertStringNotContainsString('text=', $html);
         self::assertStringContainsString('family=Roboto:wght@400', $html);
     }
@@ -163,7 +159,6 @@ final class GoogleFontsExtensionTest extends TestCase
 
         $html = $extension->renderFonts('Roboto', '400', 'normal', null, false, null, true);
 
-        // HTML entities are escaped in output
         self::assertStringContainsString('<link rel="preload"', $html);
         self::assertStringContainsString('as="style">', $html);
         self::assertStringContainsString('family=Roboto:wght@400', $html);
@@ -175,7 +170,6 @@ final class GoogleFontsExtensionTest extends TestCase
 
         $html = $extension->renderFonts('Roboto', '400');
 
-        // Should fall back to 'swap'
         self::assertStringContainsString('display=swap', $html);
     }
 
@@ -185,7 +179,6 @@ final class GoogleFontsExtensionTest extends TestCase
 
         $html = $extension->renderFonts('Roboto', '400');
 
-        // Should default to true (include preconnect)
         self::assertStringContainsString('<link rel="preconnect"', $html);
     }
 
@@ -193,10 +186,8 @@ final class GoogleFontsExtensionTest extends TestCase
     {
         $extension = new GoogleFontsRuntime(false, null, []);
 
-        // Test with weights that don't meet criteria (all <= 500)
         $html = $extension->renderFonts('Roboto', '300 400 500');
 
-        // Heading weight should use 700 as default when no weight > 500
         self::assertStringContainsString('h1, h2, h3, h4, h5, h6 {', $html);
         self::assertStringContainsString('font-weight: 700;', $html);
     }
@@ -205,21 +196,17 @@ final class GoogleFontsExtensionTest extends TestCase
     {
         $extension = new GoogleFontsRuntime(false, null, []);
 
-        // Test with weights where first > 500 is 600
         $html = $extension->renderFonts('Roboto', '300 400 600 800');
 
-        // Heading weight should use 600 (first > 500)
         self::assertStringContainsString('h1, h2, h3, h4, h5, h6 {', $html);
         self::assertStringContainsString('font-weight: 600;', $html);
 
-        // Bold weight should use 800 (first >= 700)
         self::assertStringContainsString('strong, b {', $html);
         self::assertStringContainsString('font-weight: 800;', $html);
     }
 
     public function testFallbackToDefaultsWhenInvalidConfigTypes(): void
     {
-        // Test with invalid default types to ensure type safety
         $extension = new GoogleFontsRuntime(false, null, [
             'display' => ['invalid' => 'array'], // Invalid type
             'preconnect' => 'not a bool', // Invalid type
@@ -227,7 +214,6 @@ final class GoogleFontsExtensionTest extends TestCase
 
         $html = $extension->renderFonts('Roboto', '400');
 
-        // Should fall back to safe defaults
         self::assertStringContainsString('display=swap', $html);
         self::assertStringContainsString('<link rel="preconnect"', $html);
     }
@@ -236,12 +222,10 @@ final class GoogleFontsExtensionTest extends TestCase
     {
         $extension = new GoogleFontsRuntime(true, sys_get_temp_dir() . '/invalid.json', []);
 
-        // Write invalid JSON
         file_put_contents(sys_get_temp_dir() . '/invalid.json', 'invalid json');
 
         $html = $extension->renderFonts('Roboto');
 
-        // Should fall back to CDN when manifest is invalid
         self::assertStringContainsString('fonts.googleapis.com', $html);
 
         unlink(sys_get_temp_dir() . '/invalid.json');
@@ -253,13 +237,11 @@ final class GoogleFontsExtensionTest extends TestCase
 
         $html = $extension->renderFonts('Roboto');
 
-        // Should fall back to CDN when manifest file doesn't exist
         self::assertStringContainsString('fonts.googleapis.com', $html);
     }
 
     public function testHasLockedFontsWithFailedFileGetContents(): void
     {
-        // Create a directory instead of a file to make file_get_contents fail
         $dirPath = sys_get_temp_dir() . '/test_dir_' . uniqid();
         mkdir($dirPath);
 
@@ -267,7 +249,6 @@ final class GoogleFontsExtensionTest extends TestCase
 
         $html = $extension->renderFonts('Roboto');
 
-        // Should fall back to CDN when file_get_contents fails
         self::assertStringContainsString('fonts.googleapis.com', $html);
 
         rmdir($dirPath);
@@ -277,10 +258,8 @@ final class GoogleFontsExtensionTest extends TestCase
     {
         $extension = new GoogleFontsRuntime(false, null, []);
 
-        // Test with empty array weights
         $html = $extension->renderFonts('Roboto', [], 'normal');
 
-        // Should use default weight 400
         self::assertStringContainsString('font-weight: 400;', $html);
     }
 
@@ -288,10 +267,8 @@ final class GoogleFontsExtensionTest extends TestCase
     {
         $extension = new GoogleFontsRuntime(false, null, []);
 
-        // Test with string weights (already tested above, but ensuring normalize logic)
         $html = $extension->renderFonts('Roboto', '300 400 700', 'normal italic');
 
-        // Should parse all weights and styles
         self::assertStringContainsString('wght@', $html);
         self::assertStringContainsString('ital', $html);
     }

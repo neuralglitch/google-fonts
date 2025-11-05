@@ -13,7 +13,6 @@ final class GoogleFontsApiTest extends TestCase
 {
     protected function setUp(): void
     {
-        // Clear cache before each test
         GoogleFontsApi::clearCache();
     }
 
@@ -351,7 +350,6 @@ final class GoogleFontsApiTest extends TestCase
     {
         $mockResponse = new MockResponse('@font-face { font-family: "Open Sans"; }');
         $httpClient = new MockHttpClient(function ($method, $url) use ($mockResponse) {
-            // Font name should have spaces replaced with +
             self::assertStringContainsString('family=Open+Sans', $url);
 
             return $mockResponse;
@@ -391,11 +389,9 @@ final class GoogleFontsApiTest extends TestCase
         $api = new GoogleFontsApi($httpClient, 'test-api-key');
         $api->downloadFontCss('Roboto', [400], ['normal']);
 
-        // Verify headers are set
         self::assertArrayHasKey('headers', $optionsCaptured);
         self::assertIsArray($optionsCaptured['headers']);
 
-        // Check User-Agent is in headers array (either as key or value)
         $headersFound = false;
         foreach ($optionsCaptured['headers'] as $key => $value) {
             if ('User-Agent' === $key || (is_string($value) && str_contains($value, 'User-Agent'))) {
@@ -438,7 +434,6 @@ final class GoogleFontsApiTest extends TestCase
 
         $variants = $api->getFontVariants('Roboto');
 
-        // Should not have duplicate weight 400
         $weightCounts = array_count_values($variants['weights']);
         foreach ($weightCounts as $count) {
             self::assertSame(1, $count);
@@ -460,7 +455,6 @@ final class GoogleFontsApiTest extends TestCase
 
         $variants = $api->getFontVariants('Roboto');
 
-        // Should not have duplicate 'italic' style
         $styleCounts = array_count_values($variants['styles']);
         self::assertSame(1, $styleCounts['italic']);
     }

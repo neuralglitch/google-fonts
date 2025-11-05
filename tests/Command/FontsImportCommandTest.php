@@ -39,7 +39,6 @@ final class FontsImportCommandTest extends TestCase
         self::assertTrue($definition->hasOption('styles'));
         self::assertTrue($definition->hasOption('display'));
 
-        // Test help text is set
         $help = $command->getHelp();
         self::assertNotEmpty($help);
         self::assertStringContainsString('downloads a Google Font', $help);
@@ -57,15 +56,12 @@ final class FontsImportCommandTest extends TestCase
             new MockResponse($cssContent),
         ]);
 
-        // Mock API responses for validation and download
         $apiResponses = [
-            // First: getFontMetadata for validation
             new MockResponse((string) json_encode([
                 'items' => [
                     ['family' => 'Ubuntu', 'variants' => ['300', 'regular', '700']],
                 ],
             ])),
-            // Second: downloadFontCss
             new MockResponse($cssContent),
         ];
         $apiClient = new MockHttpClient($apiResponses);
@@ -87,7 +83,6 @@ final class FontsImportCommandTest extends TestCase
         self::assertStringContainsString('Successfully imported font', $output);
         self::assertStringContainsString('Ubuntu', $output);
 
-        // Cleanup
         if (is_dir($tempDir)) {
             $filesystem->remove($tempDir);
         }
@@ -188,7 +183,6 @@ final class FontsImportCommandTest extends TestCase
         $tempDir = sys_get_temp_dir() . '/test-' . uniqid();
         mkdir($tempDir, 0777, true);
 
-        // Create failing mock
         $httpClient = new MockHttpClient([
             new MockResponse('', ['http_code' => 500]),
         ]);

@@ -46,7 +46,6 @@ final class FontLockManagerTest extends TestCase
         TWIG
         );
 
-        // Can't mock final class, create a stub directory for FontDownloader
         $fontsDir = $this->tempDir . '/fonts';
         $fontDownloader = new FontDownloader(
             $fontsDir,
@@ -138,7 +137,6 @@ final class FontLockManagerTest extends TestCase
 
     public function testLockFontsCreatesManifest(): void
     {
-        // Create mock responses for font download
         $cssContent = '@font-face { font-family: Ubuntu; }';
         $responses = [
             new MockResponse($cssContent), // API CSS
@@ -228,7 +226,6 @@ final class FontLockManagerTest extends TestCase
         $templatesDir = $this->tempDir . '/templates';
         mkdir($templatesDir, 0777, true);
 
-        // Mix of string and array syntax
         file_put_contents(
             $templatesDir . '/mixed.html.twig',
             <<<'TWIG'
@@ -257,7 +254,6 @@ final class FontLockManagerTest extends TestCase
         self::assertArrayHasKey('Roboto', $fonts);
         self::assertArrayHasKey('Inter', $fonts);
 
-        // Verify parsing works for all formats
         self::assertContains('300', $fonts['Ubuntu']['weights']);
         self::assertContains('400', $fonts['Ubuntu']['weights']);
         self::assertContains('500', $fonts['Roboto']['weights']);

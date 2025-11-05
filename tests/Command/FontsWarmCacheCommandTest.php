@@ -47,7 +47,6 @@ final class FontsWarmCacheCommandTest extends TestCase
 
         self::assertTrue($definition->hasOption('manifest'));
 
-        // Test help text is set
         $help = $command->getHelp();
         self::assertNotEmpty($help);
         self::assertStringContainsString('pre-downloads all fonts', $help);
