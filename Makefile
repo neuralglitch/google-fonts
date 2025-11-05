@@ -1,4 +1,4 @@
-.PHONY: help build shell test test-coverage phpstan cs-fix cs-check install
+.PHONY: help build shell test test-coverage phpstan cs-fix cs-check install update
 
 PHP_VERSION ?= 8.1
 

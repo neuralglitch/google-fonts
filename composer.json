@@ -33,11 +33,15 @@
     "twig/twig": "^3.0"
   },
   "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.64",
+    "infection/infection": "^0.29",
+    "phpmetrics/phpmetrics": "^2.8",
     "phpstan/phpstan": "^1.11",
     "phpunit/phpunit": "^10.5 || ^11.0",
-    "friendsofphp/php-cs-fixer": "^3.64",
+    "rector/rector": "^1.0",
+    "symfony/asset-mapper": "^6.4 || ^7.0 || ^8.0",
     "symfony/yaml": "^6.4 || ^7.0 || ^8.0",
-    "symfony/asset-mapper": "^6.4 || ^7.0 || ^8.0"
+    "vimeo/psalm": "^6.0"
   },
   "autoload": {
     "psr-4": {
@@ -52,22 +56,50 @@
   "config": {
     "sort-packages": true,
     "allow-plugins": {
-      "symfony/flex": false
+      "symfony/flex": true,
+      "infection/extension-installer": true
     }
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
     "test:coverage": "vendor/bin/phpunit --coverage-html build/coverage --coverage-clover build/coverage.xml --coverage-text",
     "phpstan": "vendor/bin/phpstan analyse --memory-limit=512M",
+    "psalm": "vendor/bin/psalm --no-cache --show-info=true",
+    "psalm:baseline": "vendor/bin/psalm --set-baseline=psalm-baseline.xml",
+    "infection": "vendor/bin/infection --threads=4 --min-msi=40 --min-covered-msi=45",
+    "infection:show": "vendor/bin/infection --show-mutations",
+    "metrics": "vendor/bin/phpmetrics --report-html=build/metrics src/",
+    "rector": "vendor/bin/rector process --dry-run",
+    "rector:fix": "vendor/bin/rector process",
     "cs-fix": "vendor/bin/php-cs-fixer fix --allow-risky=yes",
-    "cs-check": "vendor/bin/php-cs-fixer fix --dry-run --diff --allow-risky=yes"
+    "cs-check": "vendor/bin/php-cs-fixer fix --dry-run --diff --allow-risky=yes",
+    "qa": [
+      "@cs-check",
+      "@phpstan",
+      "@psalm",
+      "@test"
+    ],
+    "qa:full": [
+      "@qa",
+      "@infection",
+      "@metrics"
+    ]
   },
   "scripts-descriptions": {
     "test": "Run PHPUnit tests",
     "test:coverage": "Run PHPUnit tests with code coverage",
-    "phpstan": "Run PHPStan static analysis",
+    "phpstan": "Run PHPStan static analysis (level max)",
+    "psalm": "Run Psalm static analysis",
+    "psalm:baseline": "Generate Psalm baseline",
+    "infection": "Run Infection mutation testing",
+    "infection:show": "Show mutations without running tests",
+    "metrics": "Generate code quality metrics",
+    "rector": "Check for potential refactorings",
+    "rector:fix": "Apply automated refactorings",
     "cs-fix": "Fix code style issues",
-    "cs-check": "Check code style without fixing"
+    "cs-check": "Check code style without fixing",
+    "qa": "Run quick quality checks (CS, PHPStan, Psalm, Tests)",
+    "qa:full": "Run full quality suite including mutation testing"
   },
   "support": {
     "issues": "https://github.com/neuralglitch/google-fonts/issues",

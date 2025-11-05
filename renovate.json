@@ -1,0 +1,75 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":preserveSemverRanges"
+  ],
+  "labels": ["dependencies"],
+  "assignees": [],
+  "reviewers": [],
+  "schedule": ["before 6am on Monday"],
+  "timezone": "Europe/Berlin",
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "rangeStrategy": "bump",
+  "composer": {
+    "enabled": true,
+    "rangeStrategy": "bump"
+  },
+  "packageRules": [
+    {
+      "description": "Group Symfony packages",
+      "groupName": "Symfony packages",
+      "matchPackagePatterns": ["^symfony/"],
+      "automerge": false,
+      "schedule": ["before 6am on Monday"]
+    },
+    {
+      "description": "Group PHP QA tools",
+      "groupName": "PHP QA tools",
+      "matchPackageNames": [
+        "phpstan/phpstan",
+        "vimeo/psalm",
+        "infection/infection",
+        "phpmetrics/phpmetrics",
+        "rector/rector",
+        "friendsofphp/php-cs-fixer"
+      ],
+      "automerge": false,
+      "schedule": ["before 6am on Monday"]
+    },
+    {
+      "description": "Automerge non-breaking PHPUnit updates",
+      "matchPackageNames": ["phpunit/phpunit"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group GitHub Actions updates",
+      "groupName": "GitHub Actions",
+      "matchManagers": ["github-actions"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "schedule": ["before 6am on Monday"]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"],
+    "assignees": [],
+    "schedule": ["at any time"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
+  }
+}
+
+
