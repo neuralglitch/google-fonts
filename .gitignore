@@ -32,3 +32,6 @@ build/
 /phpstan.neon
 /.php-cs-fixer.php
 
+
+# Symfony Flex Recipes
+.recipe/
