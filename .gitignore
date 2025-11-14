@@ -30,4 +30,5 @@ build/
 # Local configuration overrides
 /phpunit.xml
 /phpstan.neon
+/.php-cs-fixer.php
 

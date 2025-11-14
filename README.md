@@ -68,7 +68,7 @@ Each font gets a single CSS file containing both `@font-face` declarations and i
 
 The bundle automatically switches to locked fonts in production (via `when@prod` configuration).
 
-**Troubleshooting:** If locked fonts aren't being used in production, see `DEBUG_LOCKED_FONTS.md`.
+**Troubleshooting:** If locked fonts aren't being used in production, see the [Production Setup](docs/production.md) guide.
 
 ### 3. Optional: Configure API key for search/import commands
 
