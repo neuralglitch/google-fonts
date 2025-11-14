@@ -89,24 +89,20 @@ docs/                     # Documentation
 ### Key Components
 
 **GoogleFontsRuntime** (Twig Runtime)
-- Lazy-loaded when `google_fonts()` is called
 - Handles dev/prod mode switching
 - Manages manifest caching
 
 **GoogleFontsApi** (Service)
 - Google Fonts API interaction
 - Font search and metadata
-- CSS download
 
 **FontDownloader** (Service)
 - Downloads font files
-- Generates combined CSS (@font-face + styles)
-- Tracks actually downloaded weights
+- Generates combined CSS
 
 **FontLockManager** (Service)
 - Scans Twig templates
 - Orchestrates font locking
-- Manages manifest file
 
 ## Writing Tests
 
@@ -139,9 +135,8 @@ final class MyServiceTest extends TestCase
 
 ### Coverage Goals
 
-- **Methods:** >80%
-- **Lines:** >90%
-- **Critical paths:** 100%
+- Maintain high test coverage
+- Ensure critical paths are fully tested
 
 ## Contributing
 
@@ -192,27 +187,6 @@ php bin/console debug:config google_fonts
 php bin/console debug:container google_fonts
 ```
 
-## Performance Optimization
-
-### Manifest Caching
-
-```php
-// Static cache with mtime checking
-private static ?array $manifestCache = null;
-private static ?int $manifestMtime = null;
-```
-
-Manifest read only once per request, reloaded only if file changes.
-
-### String Building
-
-Use array + implode for large strings:
-
-```php
-// Optimized
-$lines = [':root {', '  var: value;', '}'];
-$css = implode("\n", $lines);
-```
 
 ## Release Process
 
