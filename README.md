@@ -7,7 +7,7 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.1+-777BB4?style=flat&logo=php&logoColor=white)](composer.json)
 [![Symfony](https://img.shields.io/badge/Symfony-6.4+-343434?style=flat&logo=symfony&logoColor=white)](composer.json)
 <br/>
-[![Release](https://img.shields.io/packagist/v/neuralglitch/google-fonts.svg?style=flat&logo=packagist&logoColor=white)](https://packagist.org/packages/neuralglitch/google-fonts)
+[![Packagist](https://img.shields.io/badge/Packagist-abandoned-red?style=flat&logo=packagist&logoColor=white)](https://packagist.org/packages/neuralglitch/google-fonts)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 </div>
